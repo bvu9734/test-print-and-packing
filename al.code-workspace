@@ -10,5 +10,7 @@
       "path": ".AL-Go"
     }
   ],
-  "settings": {}
+  "settings": {
+    "powershell.cwd": "Vib Print & Packing"
+  }
 }
