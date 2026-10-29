@@ -19,6 +19,7 @@ rad.json
 .snapshots/
 cache_*
 ~$*
-Vib Print & Packing/.vscode/launch.json
-Vib Print & Packing - Test/.vscode/launch.json
-Vib Print & Packing/MVP-Feature-Plan.md
+launch.json
+launch.json
+MVP-Feature-Plan.md
+

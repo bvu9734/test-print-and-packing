@@ -13,11 +13,11 @@
   "dependencies": [],
   "screenshots": [],
   "platform": "1.0.0.0",
-  "application": "22.0.0.0",
+  "application": "29.0.0.0",
   "idRanges": [
     {
-      "from": 50000,
-      "to": 50100
+      "from": 50100,
+      "to": 50199
     }
   ],
   "features": [
