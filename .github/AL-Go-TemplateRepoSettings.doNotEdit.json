@@ -1,0 +1,24 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/AL-Go-Actions/v9.0/.Modules/settings.schema.json",
+  "type": "PTE",
+  "templateUrl": "https://github.com/microsoft/AL-Go-PTE@main",
+  "templateSha": "28c060aecd801a24e69346bea0c3cb193f327183",
+  "useCompilerFolder": true,
+  "doNotRemovePackagesFolderIfExists": true,
+  "runs-on": "ubuntu-latest",
+  "shell": "pwsh",
+  "githubRunner": "ubuntu-latest",
+  "githubRunnerShell": "pwsh",
+  "customALGoFiles": {
+    "filesToExclude": [
+      {
+        "sourceFolder": ".github/workflows",
+        "filter": "AlpacaSyncSecrets.yaml"
+      },
+      {
+        "sourceFolder": ".github/workflows",
+        "filter": "_AlpacaSyncSecrets.yaml"
+      }
+    ]
+  }
+}
