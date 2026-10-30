@@ -61,7 +61,7 @@
 </tr>
 <tr>
 <td><strong>Document version</strong></td>
-<td>0.3</td>
+<td>0.4</td>
 </tr>
 <tr>
 <td><strong>Last updated</strong></td>
@@ -69,7 +69,7 @@
 </tr>
 <tr>
 <td><strong>Covers</strong></td>
-<td>Phase 1 – Packaging master data, Phase 2 – Cost calculation, Phase 3 – Quote Wizard and Sales Quote</td>
+<td>Phase 1 – Packaging master data, Phase 2 – Cost calculation, Phase 3 – Quote Wizard, Packaging Worksheet, and Sales Quote</td>
 </tr>
 <tr>
 <td><strong>Audience</strong></td>
@@ -152,7 +152,7 @@
 <tr>
 <td>6</td>
 <td>Sales Quote</td>
-<td>Packaging Quote Wizard → standard Sales Quote</td>
+<td>Packaging Quote Wizard (one specification) or Packaging Worksheet (several specifications) → standard Sales Quote</td>
 <td>✅ Available (Phase 3)</td>
 </tr>
 <tr>
@@ -230,6 +230,10 @@
 <tr>
 <td><strong>Packaging Quote Wizard</strong></td>
 <td>A guided, four-step page that calculates the price ladder for a customer and a specification and creates a standard Sales Quote from the chosen quantity.</td>
+</tr>
+<tr>
+<td><strong>Packaging Worksheet</strong></td>
+<td>A worksheet, similar to the Requisition Worksheet, where you collect several specifications with quantities, check their prices, and create one Sales Quote per customer in one step. Work is organized in named worksheet batches.</td>
 </tr>
 </tbody>
 </table>
@@ -963,7 +967,158 @@
 <li>If the customer uses <strong>prices including VAT</strong>, VAT is added to the unit price.</li>
 </ul>
 <p>From here on you work with the standard quote: print or email it, change it, or delete it.</p>
-<h3 id="step-513-customer-approval-make-the-sales-order">Step 5.13 – Customer approval: make the sales order</h3>
+<h3 id="step-513-alternative-quote-several-specifications-with-the-packaging-worksheet">Step 5.13 – Alternative: quote several specifications with the Packaging Worksheet</h3>
+<p>Pizza Kft. also needs a printed insert for the box and wants <strong>one quote</strong> for both products. Use the <strong>Packaging Worksheet</strong> instead of the wizard.</p>
+<p><strong>Prepare the second specification.</strong> Create and release <code>SPEC0002</code> the same way as in steps 5.1 and 5.2. It gets finished item <code>PPI0002</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Description</td>
+<td>Pizza box insert, 1-color print</td>
+</tr>
+<tr>
+<td>Customer No.</td>
+<td><code>C-PIZZA</code></td>
+</tr>
+<tr>
+<td>Width (mm) / Height (mm)</td>
+<td>150 / 200</td>
+</tr>
+<tr>
+<td>Material Code</td>
+<td><code>MAT-CB-E</code></td>
+</tr>
+<tr>
+<td>Print Process</td>
+<td>Digital</td>
+</tr>
+<tr>
+<td>No. of Colors</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Lamination / Die Cut</td>
+<td>No / No</td>
+</tr>
+<tr>
+<td>Waste %</td>
+<td>5</td>
+</tr>
+</tbody>
+</table>
+<p><strong>1. Open the worksheet.</strong> Search for <strong>Packaging Worksheet</strong> with <strong>Tell me</strong> (Alt+Q). In the <strong>Name</strong> field at the top, choose the worksheet batch to work in, for example <code>DEFAULT</code> (created automatically the first time). Each salesperson can use their own batch.</p>
+<p><strong>2. Get the specifications.</strong> Choose <strong>Get Specifications</strong>. The list shows the released specifications. Select <code>SPEC0001</code> and <code>SPEC0002</code> (use <strong>Select More</strong> to mark several rows), and choose <strong>OK</strong>. One line is added per specification; the customer, description, and item are filled in from the specification.</p>
+<p><strong>3. Enter the quantities.</strong> As soon as a line has a customer, a specification, and a quantity, it gets its own cost sheet and is priced from the price ladder:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Accept</th>
+<th>Customer No.</th>
+<th>Specification No.</th>
+<th>Item No.</th>
+<th style="text-align: right;">Quantity</th>
+<th style="text-align: right;">Margin %</th>
+<th style="text-align: right;">Unit Price (LCY)</th>
+<th style="text-align: right;">Line Amount (LCY)</th>
+<th>Cost Sheet No.</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">✔</td>
+<td><code>C-PIZZA</code></td>
+<td><code>SPEC0001</code></td>
+<td><code>PPI0001</code></td>
+<td style="text-align: right;">1,000</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">1.17288</td>
+<td style="text-align: right;">1,172.88</td>
+<td><code>CS0003</code></td>
+</tr>
+<tr>
+<td style="text-align: center;">✔</td>
+<td><code>C-PIZZA</code></td>
+<td><code>SPEC0002</code></td>
+<td><code>PPI0002</code></td>
+<td style="text-align: right;">5,000</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">0.23406</td>
+<td style="text-align: right;">1,170.30</td>
+<td><code>CS0004</code></td>
+</tr>
+</tbody>
+</table>
+<p>How the insert is priced: variable unit cost 0.17505 (material 0.07875, ink 0.0063, glue 0.02, printing 0.02, labor 0.05); fixed cost 100 / 5,000 = 0.02 per piece; unit cost 0.19505 × 1.20 = <strong>0.23406</strong>.</p>
+<p>You can still change a line before creating the quote:</p>
+<table>
+<thead>
+<tr>
+<th>You want to…</th>
+<th>Do this</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Give one line a different margin</td>
+<td>Change <strong>Margin %</strong> on the line; only that line is repriced.</td>
+</tr>
+<tr>
+<td>Leave a line for later</td>
+<td>Clear <strong>Accept</strong>. The line stays in the worksheet when you create the quotes.</td>
+</tr>
+<tr>
+<td>Use updated rates</td>
+<td>Choose <strong>Calculate</strong> to reprice all lines. Changed line margins are kept.</td>
+</tr>
+<tr>
+<td>Check the calculation</td>
+<td>Select the line and choose <strong>Cost Sheet</strong>.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>4. Create the quotes.</strong> Choose <strong>Create Sales Quotes</strong>. The system creates <strong>one sales quote per customer</strong> from the accepted lines, shows the quote numbers, and removes those lines from the worksheet. In the example, one quote (for example <code>S-QUO1002</code>) is created for Pizza Kft. with two lines:</p>
+<table>
+<thead>
+<tr>
+<th>Line</th>
+<th>Item</th>
+<th style="text-align: right;">Quantity</th>
+<th style="text-align: right;">Unit Price Excl. VAT</th>
+<th style="text-align: right;">Line Amount Excl. VAT</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>PPI0001</code> – Takeaway food box, 2-color print</td>
+<td style="text-align: right;">1,000</td>
+<td style="text-align: right;">1.17288</td>
+<td style="text-align: right;">1,172.88</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>PPI0002</code> – Pizza box insert, 1-color print</td>
+<td style="text-align: right;">5,000</td>
+<td style="text-align: right;">0.23406</td>
+<td style="text-align: right;">1,170.30</td>
+</tr>
+<tr>
+<td></td>
+<td><strong>Total</strong></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"><strong>2,343.18</strong></td>
+</tr>
+</tbody>
+</table>
+<p>If the worksheet also contained lines for another customer, that customer would get a separate quote in the same run. The cost sheets <code>CS0003</code> and <code>CS0004</code> are kept and show the quote number. Prices on the quote follow the same rounding and currency rules as described in step 5.12.</p>
+<h3 id="step-514-customer-approval-make-the-sales-order">Step 5.14 – Customer approval: make the sales order</h3>
 <p>When Pizza Kft. accepts the offer, choose <strong>Make Order</strong> on the sales quote (standard Business Central). The sales order line keeps the <strong>Packaging Spec. No.</strong> and <strong>Packaging Cost Sheet No.</strong>, which Phase 5 will use to create the production order.</p>
 <hr>
 <h2 id="6-how-the-price-is-calculated">6. How the price is calculated</h2>
@@ -1046,7 +1201,9 @@
 <li><strong>Released specifications remain editable.</strong> Releasing creates the finished item only once.</li>
 <li><strong>Quotes need a released specification.</strong> The wizard only accepts released specifications with a finished item, belonging to the selected customer or to no customer.</li>
 <li><strong>A quote is a snapshot too.</strong> Recalculating the cost sheet later doesn't change an existing quote. To quote a new price, run the wizard again.</li>
-<li><strong>One quote line per run.</strong> Each wizard run creates one sales quote with one line. To offer several quantities, create a quote per quantity or add lines to the quote manually.</li>
+<li><strong>One quote line per wizard run.</strong> Each wizard run creates one sales quote with one line. To quote several specifications or quantities in one quote, use the <strong>Packaging Worksheet</strong>.</li>
+<li><strong>Worksheet lines own their cost sheets.</strong> Deleting a worksheet line, or changing its customer or specification, deletes its cost sheet—unless a quote was already created from it.</li>
+<li><strong>Worksheet quotes are all-or-nothing.</strong> If one accepted line has a problem (for example, no quantity), no quotes are created and the message tells you which line to fix.</li>
 </ul>
 <hr>
 <h2 id="8-roles-and-permissions">8. Roles and permissions</h2>
@@ -1062,7 +1219,7 @@
 <tr>
 <td><strong>PP_USER</strong></td>
 <td>Sales and calculation staff</td>
-<td>Create and maintain specifications and cost sheets; release specifications (creates the finished item); run the Packaging Quote Wizard; read setup and rates.</td>
+<td>Create and maintain specifications and cost sheets; release specifications (creates the finished item); run the Packaging Quote Wizard; work in the Packaging Worksheet and its batches; read setup and rates.</td>
 </tr>
 <tr>
 <td><strong>PP_POWERUSER</strong></td>
@@ -1112,7 +1269,12 @@
 <tr>
 <td>Quote lines</td>
 <td>The wizard creates one quote line for one quantity.</td>
-<td>Several quantities need several wizard runs or manual lines.</td>
+<td>Use the Packaging Worksheet to quote several specifications or quantities in one quote.</td>
+</tr>
+<tr>
+<td>Glue</td>
+<td>The glue quantity per piece in Packaging Setup applies to every specification.</td>
+<td>Products without glue, such as inserts and labels, are still charged for glue.</td>
 </tr>
 </tbody>
 </table>
@@ -1127,6 +1289,11 @@
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>0.4</td>
+<td>2026-10-30</td>
+<td>Phase 3: Packaging Worksheet with worksheet batches—quote several specifications at once, one sales quote per customer.</td>
+</tr>
 <tr>
 <td>0.3</td>
 <td>2026-10-30</td>

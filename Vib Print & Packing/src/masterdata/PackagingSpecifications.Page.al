@@ -44,4 +44,13 @@ page 50113 "CCO Packaging Specifications"
       }
     }
   }
+
+  /// <summary>
+  /// Returns the specifications the user selected on the page.
+  /// </summary>
+  /// <param name="PackagingSpecification">Returns the selected specifications as a filtered record.</param>
+  procedure GetSelectedSpecifications(var PackagingSpecification: Record "CCO Packaging Specification")
+  begin
+    CurrPage.SetSelectionFilter(PackagingSpecification);
+  end;
 }

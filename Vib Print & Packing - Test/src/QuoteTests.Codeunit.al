@@ -30,9 +30,9 @@ codeunit 50202 "CCO Quote Tests"
     FindQuoteLine(SalesHeader, SalesLine);
     Assert.AreEqual(SalesLine.Type::Item, SalesLine.Type, 'The quote line must be an item line.');
     Assert.AreEqual(PackagingSpecification."Item No.", SalesLine."No.", 'The quote line must be for the finished item.');
-    Assert.AreEqual(1000, SalesLine.Quantity, 'The quote line must have the chosen quantity.');
-    Assert.AreEqual(RoundUnitPrice(1.17288), SalesLine."Unit Price", 'The unit price must be the rounded ladder price.');
-    Assert.AreEqual(0, SalesLine."Line Discount %", 'The calculated price must not be discounted.');
+    AssertDecimal(1000, SalesLine.Quantity, 'The quote line must have the chosen quantity.');
+    AssertDecimal(RoundUnitPrice(1.17288), SalesLine."Unit Price", 'The unit price must be the rounded ladder price.');
+    AssertDecimal(0, SalesLine."Line Discount %", 'The calculated price must not be discounted.');
 
     // [THEN] The quote line and the cost sheet are linked
     Assert.AreEqual(PackagingSpecification."No.", SalesLine."CCO Packaging Spec. No.", 'The quote line must be linked to the specification.');
@@ -61,8 +61,8 @@ codeunit 50202 "CCO Quote Tests"
     CostSheetLine.SetRange(Quantity, 2500);
     Assert.RecordIsNotEmpty(CostSheetLine);
     FindQuoteLine(SalesHeader, SalesLine);
-    Assert.AreEqual(2500, SalesLine.Quantity, 'The quote line must have the custom quantity.');
-    Assert.AreEqual(RoundUnitPrice(0.74088), SalesLine."Unit Price", 'Unit price = (0.3774 + 600 / 2500) x 1.2, rounded.');
+    AssertDecimal(2500, SalesLine.Quantity, 'The quote line must have the custom quantity.');
+    AssertDecimal(RoundUnitPrice(0.74088), SalesLine."Unit Price", 'Unit price = (0.3774 + 600 / 2500) x 1.2, rounded.');
   end;
 
   [Test]
@@ -118,5 +118,10 @@ codeunit 50202 "CCO Quote Tests"
   begin
     Currency.Initialize('');
     RoundedUnitPrice := Round(UnitPrice, Currency."Unit-Amount Rounding Precision");
+  end;
+
+  local procedure AssertDecimal(Expected: Decimal; Actual: Decimal; Message: Text)
+  begin
+    Assert.AreEqual(Expected, Actual, Message);
   end;
 }

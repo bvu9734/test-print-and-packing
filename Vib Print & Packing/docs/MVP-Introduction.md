@@ -3,9 +3,9 @@
 | | |
 |---|---|
 | **Product** | COSMO Print & Packaging Accelerator for Microsoft Dynamics 365 Business Central |
-| **Document version** | 0.3 |
+| **Document version** | 0.4 |
 | **Last updated** | 2026-10-30 |
-| **Covers** | Phase 1 – Packaging master data, Phase 2 – Cost calculation, Phase 3 – Quote Wizard and Sales Quote |
+| **Covers** | Phase 1 – Packaging master data, Phase 2 – Cost calculation, Phase 3 – Quote Wizard, Packaging Worksheet, and Sales Quote |
 | **Audience** | Business users, key users, and customer stakeholders |
 
 > This is a living document. A new chapter is added after each implementation phase. Planned features are marked 🔜 and described only briefly until they are available.
@@ -53,7 +53,7 @@ The accelerator does not replace Business Central processes. Sales, manufacturin
 | 3 | Finished item creation | Automatic on release of the specification | ✅ Available (Phase 2) |
 | 4 | Material and production cost calculation | Packaging Cost Sheet | ✅ Available (Phase 2) |
 | 5 | Sales price calculation (price ladder) | Packaging Cost Sheet | ✅ Available (Phase 2) |
-| 6 | Sales Quote | Packaging Quote Wizard → standard Sales Quote | ✅ Available (Phase 3) |
+| 6 | Sales Quote | Packaging Quote Wizard (one specification) or Packaging Worksheet (several specifications) → standard Sales Quote | ✅ Available (Phase 3) |
 | 7 | Customer approval → Sales Order | Standard Business Central (*Make Order*) | ✅ Available (Phase 3) |
 | 8 | Production BOM and routing generation | Packaging BOM, routing templates | 🔜 Phase 4 |
 | 9 | Production Order | Action on the Sales Order | 🔜 Phase 5 |
@@ -75,6 +75,7 @@ The accelerator does not replace Business Central processes. Sales, manufacturin
 | **Fixed cost** | Costs that apply once per order: machine setup and the cutting die. They are spread over the order quantity, so larger orders get a lower unit cost. |
 | **Margin %** | A markup on cost: *Unit Price = Unit Cost × (1 + Margin % / 100)*. Each customer can have a default packaging margin. |
 | **Packaging Quote Wizard** | A guided, four-step page that calculates the price ladder for a customer and a specification and creates a standard Sales Quote from the chosen quantity. |
+| **Packaging Worksheet** | A worksheet, similar to the Requisition Worksheet, where you collect several specifications with quantities, check their prices, and create one Sales Quote per customer in one step. Work is organized in named worksheet batches. |
 
 ---
 
@@ -348,7 +349,56 @@ The cost sheet `CS0002` now shows **Sales Quote No.** `S-QUO1001`, so you can al
 
 From here on you work with the standard quote: print or email it, change it, or delete it.
 
-### Step 5.13 – Customer approval: make the sales order
+### Step 5.13 – Alternative: quote several specifications with the Packaging Worksheet
+
+Pizza Kft. also needs a printed insert for the box and wants **one quote** for both products. Use the **Packaging Worksheet** instead of the wizard.
+
+**Prepare the second specification.** Create and release `SPEC0002` the same way as in steps 5.1 and 5.2. It gets finished item `PPI0002`:
+
+| Field | Value |
+|---|---|
+| Description | Pizza box insert, 1-color print |
+| Customer No. | `C-PIZZA` |
+| Width (mm) / Height (mm) | 150 / 200 |
+| Material Code | `MAT-CB-E` |
+| Print Process | Digital |
+| No. of Colors | 1 |
+| Lamination / Die Cut | No / No |
+| Waste % | 5 |
+
+**1. Open the worksheet.** Search for **Packaging Worksheet** with **Tell me** (Alt+Q). In the **Name** field at the top, choose the worksheet batch to work in, for example `DEFAULT` (created automatically the first time). Each salesperson can use their own batch.
+
+**2. Get the specifications.** Choose **Get Specifications**. The list shows the released specifications. Select `SPEC0001` and `SPEC0002` (use **Select More** to mark several rows), and choose **OK**. One line is added per specification; the customer, description, and item are filled in from the specification.
+
+**3. Enter the quantities.** As soon as a line has a customer, a specification, and a quantity, it gets its own cost sheet and is priced from the price ladder:
+
+| Accept | Customer No. | Specification No. | Item No. | Quantity | Margin % | Unit Price (LCY) | Line Amount (LCY) | Cost Sheet No. |
+|:---:|---|---|---|---:|---:|---:|---:|---|
+| ✔ | `C-PIZZA` | `SPEC0001` | `PPI0001` | 1,000 | 20 | 1.17288 | 1,172.88 | `CS0003` |
+| ✔ | `C-PIZZA` | `SPEC0002` | `PPI0002` | 5,000 | 20 | 0.23406 | 1,170.30 | `CS0004` |
+
+How the insert is priced: variable unit cost 0.17505 (material 0.07875, ink 0.0063, glue 0.02, printing 0.02, labor 0.05); fixed cost 100 / 5,000 = 0.02 per piece; unit cost 0.19505 × 1.20 = **0.23406**.
+
+You can still change a line before creating the quote:
+
+| You want to… | Do this |
+|---|---|
+| Give one line a different margin | Change **Margin %** on the line; only that line is repriced. |
+| Leave a line for later | Clear **Accept**. The line stays in the worksheet when you create the quotes. |
+| Use updated rates | Choose **Calculate** to reprice all lines. Changed line margins are kept. |
+| Check the calculation | Select the line and choose **Cost Sheet**. |
+
+**4. Create the quotes.** Choose **Create Sales Quotes**. The system creates **one sales quote per customer** from the accepted lines, shows the quote numbers, and removes those lines from the worksheet. In the example, one quote (for example `S-QUO1002`) is created for Pizza Kft. with two lines:
+
+| Line | Item | Quantity | Unit Price Excl. VAT | Line Amount Excl. VAT |
+|---|---|---:|---:|---:|
+| 1 | `PPI0001` – Takeaway food box, 2-color print | 1,000 | 1.17288 | 1,172.88 |
+| 2 | `PPI0002` – Pizza box insert, 1-color print | 5,000 | 0.23406 | 1,170.30 |
+| | **Total** | | | **2,343.18** |
+
+If the worksheet also contained lines for another customer, that customer would get a separate quote in the same run. The cost sheets `CS0003` and `CS0004` are kept and show the quote number. Prices on the quote follow the same rounding and currency rules as described in step 5.12.
+
+### Step 5.14 – Customer approval: make the sales order
 
 When Pizza Kft. accepts the offer, choose **Make Order** on the sales quote (standard Business Central). The sales order line keeps the **Packaging Spec. No.** and **Packaging Cost Sheet No.**, which Phase 5 will use to create the production order.
 
@@ -389,7 +439,9 @@ On the **sales quote**, the unit price is then converted to the customer's curre
 - **Released specifications remain editable.** Releasing creates the finished item only once.
 - **Quotes need a released specification.** The wizard only accepts released specifications with a finished item, belonging to the selected customer or to no customer.
 - **A quote is a snapshot too.** Recalculating the cost sheet later doesn't change an existing quote. To quote a new price, run the wizard again.
-- **One quote line per run.** Each wizard run creates one sales quote with one line. To offer several quantities, create a quote per quantity or add lines to the quote manually.
+- **One quote line per wizard run.** Each wizard run creates one sales quote with one line. To quote several specifications or quantities in one quote, use the **Packaging Worksheet**.
+- **Worksheet lines own their cost sheets.** Deleting a worksheet line, or changing its customer or specification, deletes its cost sheet—unless a quote was already created from it.
+- **Worksheet quotes are all-or-nothing.** If one accepted line has a problem (for example, no quantity), no quotes are created and the message tells you which line to fix.
 
 ---
 
@@ -397,7 +449,7 @@ On the **sales quote**, the unit price is then converted to the customer's curre
 
 | Permission set | Intended for | Can do |
 |---|---|---|
-| **PP_USER** | Sales and calculation staff | Create and maintain specifications and cost sheets; release specifications (creates the finished item); run the Packaging Quote Wizard; read setup and rates. |
+| **PP_USER** | Sales and calculation staff | Create and maintain specifications and cost sheets; release specifications (creates the finished item); run the Packaging Quote Wizard; work in the Packaging Worksheet and its batches; read setup and rates. |
 | **PP_POWERUSER** | Key users | Everything in PP_USER, plus maintain Packaging Setup, the Print Cost Matrix, and customer packaging margins. |
 | **PP_ADMIN** | Administrators | Everything in PP_POWERUSER, plus full item maintenance. |
 
@@ -424,7 +476,8 @@ A **Create Packaging Production** action on the Sales Order generates the BOM an
 | Material area | Uses Height × Width only, as defined in the MVP specification; Length is not used. | Accurate for flat products such as labels. For boxes, the flat blank is larger than Height × Width, so material cost may be understated. |
 | Print cost | One rate per print process; the number of colors and the quantity don't change the rate. | Colors still affect the ink cost. |
 | Currency | All rates and cost sheet prices are in local currency (LCY). | Quotes in a foreign currency are converted with the exchange rate of the quote date; the cost sheet itself stays in LCY. |
-| Quote lines | The wizard creates one quote line for one quantity. | Several quantities need several wizard runs or manual lines. |
+| Quote lines | The wizard creates one quote line for one quantity. | Use the Packaging Worksheet to quote several specifications or quantities in one quote. |
+| Glue | The glue quantity per piece in Packaging Setup applies to every specification. | Products without glue, such as inserts and labels, are still charged for glue. |
 
 ---
 
@@ -432,6 +485,7 @@ A **Create Packaging Production** action on the Sales Order generates the BOM an
 
 | Version | Date | Change |
 |---|---|---|
+| 0.4 | 2026-10-30 | Phase 3: Packaging Worksheet with worksheet batches—quote several specifications at once, one sales quote per customer. |
 | 0.3 | 2026-10-30 | Phase 3: Packaging Quote Wizard, standard Sales Quote with the calculated price, custom quantities, links between quote line, specification, and cost sheet. |
 | 0.2 | 2026-10-30 | Phase 2: finished item on release, Print Cost Matrix, consumption setup, customer margin, cost sheet with price ladder. |
 | 0.1 | 2026-10-29 | Phase 1: packaging specification, material fields on items, setup, permission sets. |

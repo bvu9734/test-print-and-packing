@@ -139,4 +139,46 @@ codeunit 50203 "CCO Library - Packaging"
   begin
     NewCodeValue := CopyStr(DelChr(Format(CreateGuid()), '=', '{}-'), 1, MaxStrLen(NewCodeValue));
   end;
+
+  /// <summary>
+  /// Creates a customer that can be used on sales documents, with a packaging margin.
+  /// </summary>
+  procedure CreateSalesCustomer(MarginPercent: Decimal) CustomerNo: Code[20]
+  var
+    Customer: Record Customer;
+    LibrarySales: Codeunit "Library - Sales";
+  begin
+    LibrarySales.CreateCustomer(Customer);
+    Customer."CCO Packaging Margin %" := MarginPercent;
+    Customer.Modify(false);
+    CustomerNo := Customer."No.";
+  end;
+
+  /// <summary>
+  /// Creates a released specification (see CreateSpecification) with a sellable finished item.
+  /// </summary>
+  procedure CreateReleasedSpecification(var PackagingSpecification: Record "CCO Packaging Specification"; CustomerNo: Code[20]; DieCut: Boolean; Lamination: Boolean)
+  var
+    Item: Record Item;
+    LibraryInventory: Codeunit "Library - Inventory";
+  begin
+    LibraryInventory.CreateItem(Item);
+    CreateSpecification(PackagingSpecification, CustomerNo, DieCut, Lamination);
+    PackagingSpecification.Status := PackagingSpecification.Status::Released;
+    PackagingSpecification."Item No." := Item."No.";
+    PackagingSpecification.Modify(false);
+  end;
+
+  /// <summary>
+  /// Creates a packaging worksheet batch.
+  /// </summary>
+  procedure CreateWorksheetName() WorksheetName: Code[10]
+  var
+    PackagingWkshName: Record "CCO Packaging Wksh. Name";
+  begin
+    PackagingWkshName.Init();
+    PackagingWkshName.Name := CopyStr(NewCode(), 1, MaxStrLen(PackagingWkshName.Name));
+    PackagingWkshName.Insert(true);
+    WorksheetName := PackagingWkshName.Name;
+  end;
 }
