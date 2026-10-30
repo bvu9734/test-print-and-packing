@@ -42,6 +42,10 @@ page 50125 "CCO Packaging Cost Sheet"
         {
           ApplicationArea = All;
         }
+        field("Sales Quote No."; Rec."Sales Quote No.")
+        {
+          ApplicationArea = All;
+        }
       }
       part(Lines; "CCO Cost Sheet Subform")
       {

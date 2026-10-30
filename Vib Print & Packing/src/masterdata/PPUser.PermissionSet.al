@@ -18,11 +18,14 @@ permissionset 50117 "PP_USER"
     codeunit "No. Series" = X,
     codeunit "CCO Cost Engine Mgt." = X,
     codeunit "CCO Spec. Item Mgt." = X,
+    codeunit "CCO Packaging Quote Mgt." = X,
     page "CCO Packaging Specifications" = X,
     page "CCO Packaging Spec. Card" = X,
     page "CCO Packaging Cost Sheets" = X,
     page "CCO Packaging Cost Sheet" = X,
     page "CCO Cost Sheet Subform" = X,
+    page "CCO Packaging Quote Wizard" = X,
+    page "CCO Cost Sheet Ladder" = X,
     page "Item List" = X,
     page "Item Card" = X;
 }

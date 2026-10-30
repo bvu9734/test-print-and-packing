@@ -112,6 +112,22 @@ page 50114 "CCO Packaging Spec. Card"
           Page.Run(Page::"CCO Packaging Cost Sheet", CostSheet);
         end;
       }
+      action(CreateSalesQuote)
+      {
+        ApplicationArea = All;
+        Caption = 'Create Sales Quote';
+        Image = NewSalesQuote;
+        ToolTip = 'Open the quote wizard for this specification to calculate the price ladder and create a sales quote.', Comment = 'hu-HU=Megnyitja az árajánlat-varázslót ehhez a specifikációhoz az ársávok kiszámításához és az értékesítési árajánlat létrehozásához.';
+
+        trigger OnAction()
+        var
+          PackagingQuoteWizard: Page "CCO Packaging Quote Wizard";
+        begin
+          CurrPage.SaveRecord();
+          PackagingQuoteWizard.SetSpecification(Rec);
+          PackagingQuoteWizard.Run();
+        end;
+      }
     }
     area(Navigation)
     {
@@ -128,6 +144,9 @@ page 50114 "CCO Packaging Spec. Card"
     area(Promoted)
     {
       actionref(CreateCostSheet_Promoted; CreateCostSheet)
+      {
+      }
+      actionref(CreateSalesQuote_Promoted; CreateSalesQuote)
       {
       }
       actionref(CostSheets_Promoted; CostSheets)

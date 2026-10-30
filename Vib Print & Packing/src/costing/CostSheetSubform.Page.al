@@ -36,4 +36,16 @@ page 50126 "CCO Cost Sheet Subform"
       }
     }
   }
+
+  /// <summary>
+  /// Shows the price ladder of one cost sheet. Used when the part is not linked to a cost sheet record.
+  /// </summary>
+  /// <param name="CostSheetNo">The cost sheet to show.</param>
+  procedure SetCostSheet(CostSheetNo: Code[20])
+  begin
+    Rec.FilterGroup(2);
+    Rec.SetRange("Cost Sheet No.", CostSheetNo);
+    Rec.FilterGroup(0);
+    CurrPage.Update(false);
+  end;
 }

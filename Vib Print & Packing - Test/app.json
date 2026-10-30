@@ -34,6 +34,12 @@
       "publisher": "Microsoft",
       "name": "Test Runner",
       "id": "23de40a6-dfe8-4f80-80db-d70f83ce8caf"
+    },
+    {
+      "version": "29.0.0.0",
+      "publisher": "Microsoft",
+      "name": "Application Test Library",
+      "id": "d852d5d2-a39d-4179-baeb-f99a19e32510"
     }
   ],
   "screenshots": [],

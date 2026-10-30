@@ -114,6 +114,38 @@ codeunit 50107 "CCO Cost Engine Mgt."
     Quantities.Add(10000);
   end;
 
+  /// <summary>
+  /// Finds the price ladder line for a quantity on a calculated cost sheet, or adds and calculates a new line when none exists.
+  /// </summary>
+  /// <param name="CostSheet">The calculated cost sheet.</param>
+  /// <param name="LadderQuantity">The order quantity. Must be greater than zero.</param>
+  /// <param name="CostSheetLine">Returns the found or added line.</param>
+  procedure FindOrAddLadderLine(CostSheet: Record "CCO Packaging Cost Sheet"; LadderQuantity: Decimal; var CostSheetLine: Record "CCO Packaging Cost Sheet Line")
+  var
+    LastCostSheetLine: Record "CCO Packaging Cost Sheet Line";
+    QuantityErr: Label 'Quantity must be greater than zero.';
+  begin
+    if LadderQuantity <= 0 then
+      Error(QuantityErr);
+    CostSheet.TestField("Calculation Date");
+
+    CostSheetLine.Reset();
+    CostSheetLine.SetRange("Cost Sheet No.", CostSheet."No.");
+    CostSheetLine.SetRange(Quantity, LadderQuantity);
+    if CostSheetLine.FindFirst() then
+      exit;
+
+    LastCostSheetLine.SetRange("Cost Sheet No.", CostSheet."No.");
+    if LastCostSheetLine.FindLast() then;
+
+    CostSheetLine.Init();
+    CostSheetLine."Cost Sheet No." := CostSheet."No.";
+    CostSheetLine."Line No." := LastCostSheetLine."Line No." + 10000;
+    CostSheetLine.Quantity := LadderQuantity;
+    CalculateLine(CostSheet, CostSheetLine);
+    CostSheetLine.Insert(true);
+  end;
+
   local procedure CheckSpecification(PackagingSpecification: Record "CCO Packaging Specification")
   begin
     PackagingSpecification.TestField("Material Code");

@@ -231,6 +231,14 @@ table 50103 "CCO Packaging Cost Sheet"
       DecimalPlaces = 0 : 5;
       Editable = false;
     }
+    field(40; "Sales Quote No."; Code[20])
+    {
+      Caption = 'Sales Quote No.';
+      ToolTip = 'Specifies the sales quote that was created from this cost sheet.', Comment = 'hu-HU=Megadja az erről a költséglapról létrehozott értékesítési árajánlatot.';
+      DataClassification = CustomerContent;
+      TableRelation = "Sales Header"."No." where("Document Type" = const(Quote));
+      Editable = false;
+    }
   }
 
   keys

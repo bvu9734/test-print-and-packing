@@ -61,7 +61,7 @@
 </tr>
 <tr>
 <td><strong>Document version</strong></td>
-<td>0.2</td>
+<td>0.3</td>
 </tr>
 <tr>
 <td><strong>Last updated</strong></td>
@@ -69,7 +69,7 @@
 </tr>
 <tr>
 <td><strong>Covers</strong></td>
-<td>Phase 1 – Packaging master data, Phase 2 – Cost calculation</td>
+<td>Phase 1 – Packaging master data, Phase 2 – Cost calculation, Phase 3 – Quote Wizard and Sales Quote</td>
 </tr>
 <tr>
 <td><strong>Audience</strong></td>
@@ -87,7 +87,7 @@
 <li><a href="#2-end-to-end-process-and-feature-status">End-to-end process and feature status</a></li>
 <li><a href="#3-key-concepts">Key concepts</a></li>
 <li><a href="#4-one-time-setup">One-time setup</a></li>
-<li><a href="#5-worked-example-from-specification-to-price-ladder">Worked example: from specification to price ladder</a></li>
+<li><a href="#5-worked-example-from-specification-to-sales-quote">Worked example: from specification to sales quote</a></li>
 <li><a href="#6-how-the-price-is-calculated">How the price is calculated</a></li>
 <li><a href="#7-good-to-know">Good to know</a></li>
 <li><a href="#8-roles-and-permissions">Roles and permissions</a></li>
@@ -102,8 +102,8 @@
 <ol>
 <li>Describe a custom packaging product in a <strong>Packaging Specification</strong>.</li>
 <li>Calculate its <strong>cost and sales price</strong> for a range of order quantities.</li>
-<li>Create a <strong>Sales Quote</strong> from the chosen price. 🔜</li>
-<li>Turn the accepted quote into a <strong>Sales Order</strong>. 🔜</li>
+<li>Create a <strong>Sales Quote</strong> from the chosen price.</li>
+<li>Turn the accepted quote into a <strong>Sales Order</strong>.</li>
 <li>Generate the <strong>Production Order</strong>, including the bill of materials and routing. 🔜</li>
 </ol>
 <p>The accelerator does not replace Business Central processes. Sales, manufacturing, inventory, and finance continue to run on the <strong>standard Business Central documents</strong>. The accelerator adds the packaging-specific steps in front of them.</p>
@@ -153,13 +153,13 @@
 <td>6</td>
 <td>Sales Quote</td>
 <td>Packaging Quote Wizard → standard Sales Quote</td>
-<td>🔜 Phase 3</td>
+<td>✅ Available (Phase 3)</td>
 </tr>
 <tr>
 <td>7</td>
 <td>Customer approval → Sales Order</td>
-<td>Standard Business Central</td>
-<td>🔜 Phase 3</td>
+<td>Standard Business Central (<em>Make Order</em>)</td>
+<td>✅ Available (Phase 3)</td>
 </tr>
 <tr>
 <td>8</td>
@@ -226,6 +226,10 @@
 <tr>
 <td><strong>Margin %</strong></td>
 <td>A markup on cost: <em>Unit Price = Unit Cost × (1 + Margin % / 100)</em>. Each customer can have a default packaging margin.</td>
+</tr>
+<tr>
+<td><strong>Packaging Quote Wizard</strong></td>
+<td>A guided, four-step page that calculates the price ladder for a customer and a specification and creates a standard Sales Quote from the chosen quantity.</td>
 </tr>
 </tbody>
 </table>
@@ -307,6 +311,9 @@
 </tbody>
 </table>
 <p>Only items with a Packaging Material Type can be selected as the material of a specification. The item's GSM (grams per square meter) is copied to the specification automatically.</p>
+<blockquote>
+<p><strong>Tip:</strong> Set up packaging materials as <strong>Inventory</strong> items, because they are bought, stocked, and later consumed by production orders. Use m² as the base unit of measure for board and film, liters for ink, and kilograms for glue, so that the consumption settings below match the item units.</p>
+</blockquote>
 <h3 id="step-43-packaging-setup">Step 4.3 – Packaging Setup</h3>
 <p>Open <strong>Packaging Setup</strong> and fill in:</p>
 <table>
@@ -341,7 +348,7 @@
 <td>Item Creation</td>
 <td>Item Template Code</td>
 <td><code>PACKAGING</code></td>
-<td>Applied to new finished items. Recommended: the template should set the base unit of measure and posting groups.</td>
+<td>Applied to new finished items. The template should set the base unit of measure (for example PCS) and the posting groups, so the finished item can be quoted, sold, and produced.</td>
 </tr>
 <tr>
 <td>Consumption</td>
@@ -416,8 +423,32 @@
 <p>The printing prices per piece come from the MVP specification. The setup and labor values are examples.</p>
 <h3 id="step-45-customer-margin">Step 4.5 – Customer margin</h3>
 <p>On each customer card, fill in <strong>Packaging Margin %</strong> in the <strong>Packaging</strong> section. In the example, customer <code>C-PIZZA</code> (Pizza Kft.) has a margin of <strong>20%</strong>.</p>
+<h3 id="step-46-sales-quote-prerequisites">Step 4.6 – Sales quote prerequisites</h3>
+<p>The quote wizard creates standard sales documents, so the standard sales setup must be complete:</p>
+<table>
+<thead>
+<tr>
+<th>Where</th>
+<th>What to check</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Sales &amp; Receivables Setup</strong></td>
+<td><strong>Quote Nos.</strong> and <strong>Order Nos.</strong> are filled in.</td>
+</tr>
+<tr>
+<td><strong>Customer card</strong></td>
+<td>The customer has the posting groups needed for sales documents, and is not blocked.</td>
+</tr>
+<tr>
+<td><strong>Item template</strong> (<code>PACKAGING</code>)</td>
+<td>Sets the base unit of measure and the general product, VAT product, and inventory posting groups (see step 4.3).</td>
+</tr>
+</tbody>
+</table>
 <hr>
-<h2 id="5-worked-example-from-specification-to-price-ladder">5. Worked example: from specification to price ladder</h2>
+<h2 id="5-worked-example-from-specification-to-sales-quote">5. Worked example: from specification to sales quote</h2>
 <p><strong>Scenario:</strong> Pizza Kft. asks for a printed, laminated takeaway food box with a custom cutting die.</p>
 <h3 id="step-51-create-the-packaging-specification">Step 5.1 – Create the packaging specification</h3>
 <p>Open <strong>Packaging Specifications</strong>, choose <strong>New</strong>, and fill in the card:</p>
@@ -682,6 +713,258 @@
 </tr>
 </tbody>
 </table>
+<h3 id="step-57-start-the-packaging-quote-wizard">Step 5.7 – Start the Packaging Quote Wizard</h3>
+<p>Pizza Kft. wants a quote for 1,000 boxes. Open the wizard in one of two ways:</p>
+<ul>
+<li>On the specification card <code>SPEC0001</code>, choose <strong>Create Sales Quote</strong>. The wizard opens with the customer and the specification already filled in.</li>
+<li>Or search for <strong>Packaging Quote Wizard</strong> with <strong>Tell me</strong> (Alt+Q) and start with empty fields.</li>
+</ul>
+<p>The wizard has four steps. Use <strong>Back</strong> and <strong>Next</strong> to move between them.</p>
+<h3 id="step-58-wizard-step-1-customer">Step 5.8 – Wizard step 1: Customer</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Customer No.</td>
+<td><code>C-PIZZA</code></td>
+</tr>
+<tr>
+<td>Customer Name</td>
+<td>Pizza Kft. <em>(shown automatically)</em></td>
+</tr>
+</tbody>
+</table>
+<p>Choose <strong>Next</strong>.</p>
+<h3 id="step-59-wizard-step-2-packaging-specification">Step 5.9 – Wizard step 2: Packaging specification</h3>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Specification No.</td>
+<td><code>SPEC0001</code></td>
+</tr>
+<tr>
+<td>Description</td>
+<td>Takeaway food box, 2-color print <em>(shown automatically)</em></td>
+</tr>
+<tr>
+<td>Item No.</td>
+<td><code>PPI0001</code> <em>(the finished item created on release)</em></td>
+</tr>
+</tbody>
+</table>
+<p>The lookup shows only <strong>released</strong> specifications of the customer, plus generic specifications without a customer. Choose <strong>Next</strong>.</p>
+<h3 id="step-510-wizard-step-3-price-ladder">Step 5.10 – Wizard step 3: Price ladder</h3>
+<p>When you enter this step, the wizard creates a new cost sheet (for example <code>CS0002</code>) and calculates it. The price ladder is the same as in step 5.5, with the customer's 20% margin:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Quantity</th>
+<th style="text-align: right;">Unit Cost</th>
+<th style="text-align: right;">Unit Price</th>
+<th style="text-align: right;">Line Amount</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">100</td>
+<td style="text-align: right;">6.3774</td>
+<td style="text-align: right;">7.65288</td>
+<td style="text-align: right;">765.288</td>
+</tr>
+<tr>
+<td style="text-align: right;">500</td>
+<td style="text-align: right;">1.5774</td>
+<td style="text-align: right;">1.89288</td>
+<td style="text-align: right;">946.44</td>
+</tr>
+<tr>
+<td style="text-align: right;"><strong>1,000</strong></td>
+<td style="text-align: right;"><strong>0.9774</strong></td>
+<td style="text-align: right;"><strong>1.17288</strong></td>
+<td style="text-align: right;"><strong>1,172.88</strong></td>
+</tr>
+<tr>
+<td style="text-align: right;">5,000</td>
+<td style="text-align: right;">0.4974</td>
+<td style="text-align: right;">0.59688</td>
+<td style="text-align: right;">2,984.40</td>
+</tr>
+<tr>
+<td style="text-align: right;">10,000</td>
+<td style="text-align: right;">0.4374</td>
+<td style="text-align: right;">0.52488</td>
+<td style="text-align: right;">5,248.80</td>
+</tr>
+</tbody>
+</table>
+<p>Choose the quantity in <strong>Quantity to Quote</strong>: use the lookup to pick a ladder line, or type a quantity. In the example, select <strong>1,000</strong>. The wizard shows:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Margin %</td>
+<td>20</td>
+</tr>
+<tr>
+<td>Quantity to Quote</td>
+<td>1,000</td>
+</tr>
+<tr>
+<td>Unit Price (LCY)</td>
+<td>1.17288</td>
+</tr>
+<tr>
+<td>Line Amount (LCY)</td>
+<td>1,172.88</td>
+</tr>
+</tbody>
+</table>
+<p>Other options in this step:</p>
+<table>
+<thead>
+<tr>
+<th>You want to…</th>
+<th>Do this</th>
+<th>Example result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Quote a quantity that isn't in the ladder</td>
+<td>Type it in <strong>Quantity to Quote</strong>, e.g. 2,500</td>
+<td>A ladder line is added: fixed cost per piece 600 / 2,500 = 0.24, unit cost 0.6174, unit price <strong>0.74088</strong>, line amount 1,852.20.</td>
+</tr>
+<tr>
+<td>Give this customer a different margin for this quote</td>
+<td>Change <strong>Margin %</strong>, e.g. to 25</td>
+<td>All ladder prices update; 1,000 pieces cost <strong>1.22175</strong> each. The customer's default margin is not changed.</td>
+</tr>
+</tbody>
+</table>
+<p>Choose <strong>Next</strong>.</p>
+<h3 id="step-511-wizard-step-4-review-and-create-the-quote">Step 5.11 – Wizard step 4: Review and create the quote</h3>
+<p>Check the summary:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Customer</td>
+<td>Pizza Kft.</td>
+</tr>
+<tr>
+<td>Specification</td>
+<td>Takeaway food box, 2-color print</td>
+</tr>
+<tr>
+<td>Item No.</td>
+<td><code>PPI0001</code></td>
+</tr>
+<tr>
+<td>Quantity</td>
+<td>1,000</td>
+</tr>
+<tr>
+<td>Margin %</td>
+<td>20</td>
+</tr>
+<tr>
+<td>Unit Price (LCY)</td>
+<td>1.17288</td>
+</tr>
+<tr>
+<td>Line Amount (LCY)</td>
+<td>1,172.88</td>
+</tr>
+<tr>
+<td>Cost Sheet No.</td>
+<td><code>CS0002</code></td>
+</tr>
+</tbody>
+</table>
+<p>Choose <strong>Create Quote</strong>. The wizard closes and the new <strong>Sales Quote</strong> opens.</p>
+<blockquote>
+<p>If you close the wizard without creating a quote, the cost sheet it created is deleted again.</p>
+</blockquote>
+<h3 id="step-512-result-the-sales-quote">Step 5.12 – Result: the sales quote</h3>
+<p>The standard Sales Quote (for example <code>S-QUO1001</code>, from <strong>Quote Nos.</strong> in Sales &amp; Receivables Setup) contains:</p>
+<table>
+<thead>
+<tr>
+<th>Sales Quote field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sell-to Customer No.</td>
+<td><code>C-PIZZA</code></td>
+</tr>
+<tr>
+<td>Line: Type / No.</td>
+<td>Item / <code>PPI0001</code></td>
+</tr>
+<tr>
+<td>Line: Description</td>
+<td>Takeaway food box, 2-color print</td>
+</tr>
+<tr>
+<td>Line: Quantity</td>
+<td>1,000</td>
+</tr>
+<tr>
+<td>Line: Unit Price Excl. VAT</td>
+<td>1.17288 <em>(see note on rounding)</em></td>
+</tr>
+<tr>
+<td>Line: Line Discount %</td>
+<td>0</td>
+</tr>
+<tr>
+<td>Line: Line Amount Excl. VAT</td>
+<td>1,172.88</td>
+</tr>
+<tr>
+<td>Line: Packaging Spec. No.</td>
+<td><code>SPEC0001</code></td>
+</tr>
+<tr>
+<td>Line: Packaging Cost Sheet No.</td>
+<td><code>CS0002</code></td>
+</tr>
+</tbody>
+</table>
+<p>The cost sheet <code>CS0002</code> now shows <strong>Sales Quote No.</strong> <code>S-QUO1001</code>, so you can always see which calculation a quote is based on.</p>
+<p><strong>How the quote price is set:</strong></p>
+<ul>
+<li>The unit price is the calculated ladder price. Standard sales prices and line discounts don't change it, because the margin is already included.</li>
+<li>The price is <strong>rounded</strong> with the <em>Unit-Amount Rounding Precision</em> of the currency. With a precision of 0.00001 the price stays 1.17288; with a precision of 0.01 it becomes 1.17.</li>
+<li>If the customer uses a <strong>foreign currency</strong>, the LCY price is converted with the exchange rate of the quote.</li>
+<li>If the customer uses <strong>prices including VAT</strong>, VAT is added to the unit price.</li>
+</ul>
+<p>From here on you work with the standard quote: print or email it, change it, or delete it.</p>
+<h3 id="step-513-customer-approval-make-the-sales-order">Step 5.13 – Customer approval: make the sales order</h3>
+<p>When Pizza Kft. accepts the offer, choose <strong>Make Order</strong> on the sales quote (standard Business Central). The sales order line keeps the <strong>Packaging Spec. No.</strong> and <strong>Packaging Cost Sheet No.</strong>, which Phase 5 will use to create the production order.</p>
 <hr>
 <h2 id="6-how-the-price-is-calculated">6. How the price is calculated</h2>
 <p>For each piece, with order quantity <strong>Q</strong>:</p>
@@ -751,6 +1034,7 @@
 </tr>
 </tbody>
 </table>
+<p>On the <strong>sales quote</strong>, the unit price is then converted to the customer's currency (if any), VAT is added if the customer uses prices including VAT, and the result is rounded with the currency's unit-amount rounding precision.</p>
 <hr>
 <h2 id="7-good-to-know">7. Good to know</h2>
 <ul>
@@ -760,6 +1044,9 @@
 <li><strong>Customer margin:</strong> if the customer has no packaging margin, the cost sheet starts with 0%. Check the margin before you send a price.</li>
 <li><strong>Snapshot:</strong> a cost sheet keeps the values it was calculated with. After changing the specification or rates, choose <strong>Calculate</strong> to update it. Selecting a different specification on a cost sheet clears its calculation date until it's recalculated.</li>
 <li><strong>Released specifications remain editable.</strong> Releasing creates the finished item only once.</li>
+<li><strong>Quotes need a released specification.</strong> The wizard only accepts released specifications with a finished item, belonging to the selected customer or to no customer.</li>
+<li><strong>A quote is a snapshot too.</strong> Recalculating the cost sheet later doesn't change an existing quote. To quote a new price, run the wizard again.</li>
+<li><strong>One quote line per run.</strong> Each wizard run creates one sales quote with one line. To offer several quantities, create a quote per quantity or add lines to the quote manually.</li>
 </ul>
 <hr>
 <h2 id="8-roles-and-permissions">8. Roles and permissions</h2>
@@ -775,7 +1062,7 @@
 <tr>
 <td><strong>PP_USER</strong></td>
 <td>Sales and calculation staff</td>
-<td>Create and maintain specifications and cost sheets; release specifications (creates the finished item); read setup and rates.</td>
+<td>Create and maintain specifications and cost sheets; release specifications (creates the finished item); run the Packaging Quote Wizard; read setup and rates.</td>
 </tr>
 <tr>
 <td><strong>PP_POWERUSER</strong></td>
@@ -789,14 +1076,12 @@
 </tr>
 </tbody>
 </table>
-<p>Users also need the standard Business Central permissions for their role, for example for working with items and customers.</p>
+<p>Users also need the standard Business Central permissions for their role, for example for working with items, customers, and sales quotes and orders.</p>
 <hr>
 <h2 id="9-coming-next">9. Coming next</h2>
-<h3 id="91-phase-3-quote-wizard-and-sales-quote">9.1 Phase 3 – Quote Wizard and Sales Quote 🔜</h3>
-<p>A guided wizard: select the customer, select the specification, choose a quantity from the price ladder, run the calculation, and create a standard <strong>Sales Quote</strong> with the finished item and the calculated unit price. The accepted quote is turned into a Sales Order with the standard <em>Make Order</em> function.</p>
-<h3 id="92-phase-4-production-bom-and-routing">9.2 Phase 4 – Production BOM and routing 🔜</h3>
+<h3 id="91-phase-4-production-bom-and-routing">9.1 Phase 4 – Production BOM and routing 🔜</h3>
 <p>From the specification, the system generates a <strong>Production BOM</strong> (board, ink, glue, film) and a <strong>Routing</strong> from templates such as <code>BOX_STD</code> (Printing → Die Cutting → Folding → Gluing → Packing), <code>LABEL_STD</code>, and <code>DIGITAL_STD</code>.</p>
-<h3 id="93-phase-5-production-order">9.3 Phase 5 – Production order 🔜</h3>
+<h3 id="92-phase-5-production-order">9.2 Phase 5 – Production order 🔜</h3>
 <p>A <strong>Create Packaging Production</strong> action on the Sales Order generates the BOM and routing, if needed, and creates the <strong>Production Order</strong> as <em>Firm Planned</em> or <em>Released</em>, depending on the setup.</p>
 <hr>
 <h2 id="10-known-limitations">10. Known limitations</h2>
@@ -821,13 +1106,13 @@
 </tr>
 <tr>
 <td>Currency</td>
-<td>All rates and prices are in local currency (LCY).</td>
-<td>Quotes in foreign currency are not handled yet.</td>
+<td>All rates and cost sheet prices are in local currency (LCY).</td>
+<td>Quotes in a foreign currency are converted with the exchange rate of the quote date; the cost sheet itself stays in LCY.</td>
 </tr>
 <tr>
-<td>Rounding</td>
-<td>Unit prices keep up to 5 decimals on the cost sheet.</td>
-<td>Rounding to sales prices will be handled when the quote is created (Phase 3).</td>
+<td>Quote lines</td>
+<td>The wizard creates one quote line for one quantity.</td>
+<td>Several quantities need several wizard runs or manual lines.</td>
 </tr>
 </tbody>
 </table>
@@ -842,6 +1127,11 @@
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>0.3</td>
+<td>2026-10-30</td>
+<td>Phase 3: Packaging Quote Wizard, standard Sales Quote with the calculated price, custom quantities, links between quote line, specification, and cost sheet.</td>
+</tr>
 <tr>
 <td>0.2</td>
 <td>2026-10-30</td>

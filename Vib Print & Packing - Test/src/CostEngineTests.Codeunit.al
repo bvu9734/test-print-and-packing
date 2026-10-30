@@ -5,6 +5,7 @@ codeunit 50200 "CCO Cost Engine Tests"
 
   var
     Assert: Codeunit "Library Assert";
+    LibraryPackaging: Codeunit "CCO Library - Packaging";
     CostEngineMgt: Codeunit "CCO Cost Engine Mgt.";
 
   [Test]
@@ -15,11 +16,11 @@ codeunit 50200 "CCO Cost Engine Tests"
     CostSheetLine: Record "CCO Packaging Cost Sheet Line";
   begin
     // [GIVEN] A Digital specification of 300 x 200 mm with 10% waste, 2 colors, lamination, and a die cost of 500
-    Initialize();
-    CreateSpecification(PackagingSpecification, CreateCustomer(20), true, true);
+    LibraryPackaging.InitializeRates();
+    LibraryPackaging.CreateSpecification(PackagingSpecification, LibraryPackaging.CreateCustomer(20), true, true);
 
     // [WHEN] The cost sheet is calculated
-    CreateCalculatedCostSheet(PackagingSpecification, CostSheet);
+    LibraryPackaging.CreateCalculatedCostSheet(PackagingSpecification, CostSheet);
 
     // [THEN] Each cost component follows the agreed formula
     AssertDecimal(0.06, CostSheet."Base Area (m²)", 'Base Area = 300 x 200 / 1,000,000');
@@ -50,11 +51,11 @@ codeunit 50200 "CCO Cost Engine Tests"
     LadderQuantity: Decimal;
   begin
     // [GIVEN] A specification
-    Initialize();
-    CreateSpecification(PackagingSpecification, '', false, false);
+    LibraryPackaging.InitializeRates();
+    LibraryPackaging.CreateSpecification(PackagingSpecification, '', false, false);
 
     // [WHEN] A new cost sheet is calculated
-    CreateCalculatedCostSheet(PackagingSpecification, CostSheet);
+    LibraryPackaging.CreateCalculatedCostSheet(PackagingSpecification, CostSheet);
 
     // [THEN] One line exists for each default ladder quantity
     CostSheetLine.SetRange("Cost Sheet No.", CostSheet."No.");
@@ -70,11 +71,11 @@ codeunit 50200 "CCO Cost Engine Tests"
     CostSheet: Record "CCO Packaging Cost Sheet";
   begin
     // [GIVEN] A specification with a die cost but without die cutting or lamination
-    Initialize();
-    CreateSpecification(PackagingSpecification, '', false, false);
+    LibraryPackaging.InitializeRates();
+    LibraryPackaging.CreateSpecification(PackagingSpecification, '', false, false);
 
     // [WHEN] The cost sheet is calculated
-    CreateCalculatedCostSheet(PackagingSpecification, CostSheet);
+    LibraryPackaging.CreateCalculatedCostSheet(PackagingSpecification, CostSheet);
 
     // [THEN] Only the machine setup cost is a fixed cost, and no lamination cost applies
     AssertDecimal(0, CostSheet."Die Cost", 'Die Cost must be zero without die cutting.');
@@ -89,11 +90,11 @@ codeunit 50200 "CCO Cost Engine Tests"
     CostSheet: Record "CCO Packaging Cost Sheet";
   begin
     // [GIVEN] A specification for a customer with a 25% packaging margin
-    Initialize();
-    CreateSpecification(PackagingSpecification, CreateCustomer(25), false, false);
+    LibraryPackaging.InitializeRates();
+    LibraryPackaging.CreateSpecification(PackagingSpecification, LibraryPackaging.CreateCustomer(25), false, false);
 
     // [WHEN] The specification is selected on a cost sheet
-    CreateCalculatedCostSheet(PackagingSpecification, CostSheet);
+    LibraryPackaging.CreateCalculatedCostSheet(PackagingSpecification, CostSheet);
 
     // [THEN] The cost sheet uses the customer margin
     AssertDecimal(25, CostSheet."Margin %", 'Margin % must default from the customer.');
@@ -107,9 +108,9 @@ codeunit 50200 "CCO Cost Engine Tests"
     CostSheetLine: Record "CCO Packaging Cost Sheet Line";
   begin
     // [GIVEN] A calculated cost sheet
-    Initialize();
-    CreateSpecification(PackagingSpecification, '', false, false);
-    CreateCalculatedCostSheet(PackagingSpecification, CostSheet);
+    LibraryPackaging.InitializeRates();
+    LibraryPackaging.CreateSpecification(PackagingSpecification, '', false, false);
+    LibraryPackaging.CreateCalculatedCostSheet(PackagingSpecification, CostSheet);
 
     // [WHEN] The margin is changed to 50%
     CostSheet.Validate("Margin %", 50);
@@ -125,6 +126,30 @@ codeunit 50200 "CCO Cost Engine Tests"
   end;
 
   [Test]
+  procedure FindOrAddLadderLineAddsCustomQuantity()
+  var
+    PackagingSpecification: Record "CCO Packaging Specification";
+    CostSheet: Record "CCO Packaging Cost Sheet";
+    CostSheetLine: Record "CCO Packaging Cost Sheet Line";
+  begin
+    // [GIVEN] A calculated cost sheet with die cutting and lamination, margin 20%
+    LibraryPackaging.InitializeRates();
+    LibraryPackaging.CreateSpecification(PackagingSpecification, LibraryPackaging.CreateCustomer(20), true, true);
+    LibraryPackaging.CreateCalculatedCostSheet(PackagingSpecification, CostSheet);
+
+    // [WHEN] A quantity outside the default ladder is requested
+    CostEngineMgt.FindOrAddLadderLine(CostSheet, 2500, CostSheetLine);
+
+    // [THEN] A calculated line is added for it
+    AssertDecimal(0.24, CostSheetLine."Fixed Cost per Piece", 'Fixed Cost per Piece = 600 / 2500');
+    AssertDecimal(0.6174, CostSheetLine."Unit Cost", 'Unit Cost = 0.3774 + 0.24');
+    AssertDecimal(0.74088, CostSheetLine."Unit Price", 'Unit Price = 0.6174 x 1.2');
+    CostSheetLine.Reset();
+    CostSheetLine.SetRange("Cost Sheet No.", CostSheet."No.");
+    Assert.AreEqual(6, CostSheetLine.Count(), 'The custom quantity must be added to the five default quantities.');
+  end;
+
+  [Test]
   procedure MissingPrintCostMatrixRaisesError()
   var
     PackagingSpecification: Record "CCO Packaging Specification";
@@ -132,15 +157,15 @@ codeunit 50200 "CCO Cost Engine Tests"
     PrintCostMatrix: Record "CCO Print Cost Matrix";
   begin
     // [GIVEN] A Screen specification and no Screen rates in the print cost matrix
-    Initialize();
-    CreateSpecification(PackagingSpecification, '', false, false);
+    LibraryPackaging.InitializeRates();
+    LibraryPackaging.CreateSpecification(PackagingSpecification, '', false, false);
     PackagingSpecification."Print Process" := PackagingSpecification."Print Process"::Screen;
     PackagingSpecification.Modify(false);
     PrintCostMatrix.SetRange("Print Process", PrintCostMatrix."Print Process"::Screen);
     PrintCostMatrix.DeleteAll();
 
     // [WHEN] The cost sheet is calculated
-    asserterror CreateCalculatedCostSheet(PackagingSpecification, CostSheet);
+    asserterror LibraryPackaging.CreateCalculatedCostSheet(PackagingSpecification, CostSheet);
 
     // [THEN] The missing rates are reported
     Assert.ExpectedError('The print cost matrix has no rates for print process');
@@ -154,12 +179,12 @@ codeunit 50200 "CCO Cost Engine Tests"
     Item: Record Item;
   begin
     // [GIVEN] An item number series in the packaging setup and a draft specification
-    Initialize();
+    LibraryPackaging.InitializeRates();
     PackagingSetup.Get();
-    PackagingSetup."Item Nos." := CreateNoSeries();
+    PackagingSetup."Item Nos." := LibraryPackaging.CreateNoSeries();
     PackagingSetup."Item Template Code" := '';
     PackagingSetup.Modify(false);
-    CreateSpecification(PackagingSpecification, '', false, false);
+    LibraryPackaging.CreateSpecification(PackagingSpecification, '', false, false);
 
     // [WHEN] The specification is released
     PackagingSpecification.Validate(Status, PackagingSpecification.Status::Released);
@@ -174,113 +199,6 @@ codeunit 50200 "CCO Cost Engine Tests"
     Assert.AreEqual(Item."Manufacturing Policy"::"Make-to-Order", Item."Manufacturing Policy", 'The item must be made to order.');
   end;
 
-  local procedure Initialize()
-  var
-    PackagingSetup: Record "CCO Packaging Setup";
-  begin
-    if not PackagingSetup.Get() then begin
-      PackagingSetup.Init();
-      PackagingSetup.Insert(false);
-    end;
-    PackagingSetup."Ink Item No." := CreateItem(0, 20);
-    PackagingSetup."Ink Qty. per m² per Color" := 0.01;
-    PackagingSetup."Glue Item No." := CreateItem(0, 4);
-    PackagingSetup."Glue Qty. per Piece" := 0.005;
-    PackagingSetup."Lamination Film Item No." := CreateItem(1, 0);
-    PackagingSetup."Lamination Cost per Piece" := 0.03;
-    PackagingSetup.Modify(false);
-
-    SetPrintCost("CCO Print Process"::Digital, 0.02, 100, 0.05);
-  end;
-
-  local procedure CreateSpecification(var PackagingSpecification: Record "CCO Packaging Specification"; CustomerNo: Code[20]; DieCut: Boolean; Lamination: Boolean)
-  begin
-    PackagingSpecification.Init();
-    PackagingSpecification."No." := NewCode();
-    PackagingSpecification.Description := 'Pizza box';
-    PackagingSpecification."Customer No." := CustomerNo;
-    PackagingSpecification."Width (mm)" := 200;
-    PackagingSpecification."Height (mm)" := 300;
-    PackagingSpecification."Length (mm)" := 400;
-    PackagingSpecification."Waste %" := 10;
-    PackagingSpecification."Material Code" := CreateItem(2.5, 0);
-    PackagingSpecification."Print Process" := PackagingSpecification."Print Process"::Digital;
-    PackagingSpecification."No. of Colors" := 2;
-    PackagingSpecification.Lamination := Lamination;
-    PackagingSpecification."Die Cut" := DieCut;
-    PackagingSpecification."Die Cost" := 500;
-    PackagingSpecification.Insert(false);
-  end;
-
-  local procedure CreateCalculatedCostSheet(PackagingSpecification: Record "CCO Packaging Specification"; var CostSheet: Record "CCO Packaging Cost Sheet")
-  begin
-    CostSheet.Init();
-    CostSheet."No." := NewCode();
-    CostSheet.Insert(true);
-    CostSheet.Validate("Specification No.", PackagingSpecification."No.");
-    CostSheet.Modify(true);
-    CostEngineMgt.Calculate(CostSheet);
-  end;
-
-  local procedure CreateItem(CostPerSquareMeter: Decimal; UnitCost: Decimal) ItemNo: Code[20]
-  var
-    Item: Record Item;
-  begin
-    Item.Init();
-    Item."No." := NewCode();
-    Item."CCO Packaging Material Type" := Item."CCO Packaging Material Type"::Paper;
-    Item."CCO Cost per m²" := CostPerSquareMeter;
-    Item."Unit Cost" := UnitCost;
-    Item.Insert(false);
-    ItemNo := Item."No.";
-  end;
-
-  local procedure CreateCustomer(MarginPercent: Decimal) CustomerNo: Code[20]
-  var
-    Customer: Record Customer;
-  begin
-    Customer.Init();
-    Customer."No." := NewCode();
-    Customer."CCO Packaging Margin %" := MarginPercent;
-    Customer.Insert(false);
-    CustomerNo := Customer."No.";
-  end;
-
-  local procedure CreateNoSeries() NoSeriesCode: Code[20]
-  var
-    NoSeries: Record "No. Series";
-    NoSeriesLine: Record "No. Series Line";
-  begin
-    NoSeries.Init();
-    NoSeries.Code := NewCode();
-    NoSeries."Default Nos." := true;
-    NoSeries."Manual Nos." := true;
-    NoSeries.Insert(false);
-
-    NoSeriesLine.Init();
-    NoSeriesLine."Series Code" := NoSeries.Code;
-    NoSeriesLine."Line No." := 10000;
-    NoSeriesLine."Starting No." := 'PPTEST00001';
-    NoSeriesLine.Open := true;
-    NoSeriesLine.Insert(false);
-    NoSeriesCode := NoSeries.Code;
-  end;
-
-  local procedure SetPrintCost(PrintProcess: Enum "CCO Print Process"; PrintCostPerPiece: Decimal; MachineSetupCost: Decimal; LaborCostPerPiece: Decimal)
-  var
-    PrintCostMatrix: Record "CCO Print Cost Matrix";
-  begin
-    if not PrintCostMatrix.Get(PrintProcess) then begin
-      PrintCostMatrix.Init();
-      PrintCostMatrix."Print Process" := PrintProcess;
-      PrintCostMatrix.Insert(true);
-    end;
-    PrintCostMatrix."Print Cost per Piece" := PrintCostPerPiece;
-    PrintCostMatrix."Machine Setup Cost" := MachineSetupCost;
-    PrintCostMatrix."Labor Cost per Piece" := LaborCostPerPiece;
-    PrintCostMatrix.Modify(false);
-  end;
-
   local procedure FindLine(CostSheet: Record "CCO Packaging Cost Sheet"; LadderQuantity: Decimal; var CostSheetLine: Record "CCO Packaging Cost Sheet Line")
   var
     LineMissingMsg: Label 'A line for quantity %1 must exist.', Comment = '%1 = Quantity', Locked = true;
@@ -293,10 +211,5 @@ codeunit 50200 "CCO Cost Engine Tests"
   local procedure AssertDecimal(Expected: Decimal; Actual: Decimal; Message: Text)
   begin
     Assert.AreEqual(Expected, Actual, Message);
-  end;
-
-  local procedure NewCode() NewCodeValue: Code[20]
-  begin
-    NewCodeValue := CopyStr(DelChr(Format(CreateGuid()), '=', '{}-'), 1, MaxStrLen(NewCodeValue));
   end;
 }
