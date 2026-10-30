@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>COSMO Print & Packaging Accelerator – MVP Introduction</title>
+<style>
+  :root {
+    --accent: #0b5cad;
+    --border: #d0d7de;
+    --muted: #57606a;
+    --stripe: #f6f8fa;
+  }
+  body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    line-height: 1.55;
+    color: #1f2328;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 32px 24px 64px;
+  }
+  h1 { color: var(--accent); border-bottom: 3px solid var(--accent); padding-bottom: 8px; }
+  h2 { color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 4px; margin-top: 40px; }
+  h3 { margin-top: 28px; }
+  table { border-collapse: collapse; width: 100%; margin: 12px 0 20px; font-size: 0.95em; }
+  th, td { border: 1px solid var(--border); padding: 6px 10px; vertical-align: top; }
+  th { background: #eaf1fb; text-align: left; }
+  tr:nth-child(even) td { background: var(--stripe); }
+  code { background: #eff1f3; padding: 1px 5px; border-radius: 4px; font-size: 0.9em; }
+  pre { background: #f6f8fa; border: 1px solid var(--border); padding: 12px; border-radius: 6px; overflow-x: auto; }
+  pre code { background: none; padding: 0; }
+  blockquote {
+    margin: 16px 0;
+    padding: 8px 16px;
+    border-left: 4px solid var(--accent);
+    background: #f1f6fd;
+    color: var(--muted);
+  }
+  hr { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+  a { color: var(--accent); }
+  @media print {
+    body { max-width: none; padding: 0; }
+    h2 { page-break-after: avoid; }
+    table, blockquote { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<h1 id="cosmo-print-packaging-accelerator-mvp-introduction">COSMO Print &amp; Packaging Accelerator – MVP Introduction</h1>
+<table>
+<thead>
+<tr>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Product</strong></td>
+<td>COSMO Print &amp; Packaging Accelerator for Microsoft Dynamics 365 Business Central</td>
+</tr>
+<tr>
+<td><strong>Document version</strong></td>
+<td>0.2</td>
+</tr>
+<tr>
+<td><strong>Last updated</strong></td>
+<td>2026-10-30</td>
+</tr>
+<tr>
+<td><strong>Covers</strong></td>
+<td>Phase 1 – Packaging master data, Phase 2 – Cost calculation</td>
+</tr>
+<tr>
+<td><strong>Audience</strong></td>
+<td>Business users, key users, and customer stakeholders</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>This is a living document. A new chapter is added after each implementation phase. Planned features are marked 🔜 and described only briefly until they are available.</p>
+</blockquote>
+<hr>
+<h2 id="contents">Contents</h2>
+<ol>
+<li><a href="#1-what-the-mvp-does">What the MVP does</a></li>
+<li><a href="#2-end-to-end-process-and-feature-status">End-to-end process and feature status</a></li>
+<li><a href="#3-key-concepts">Key concepts</a></li>
+<li><a href="#4-one-time-setup">One-time setup</a></li>
+<li><a href="#5-worked-example-from-specification-to-price-ladder">Worked example: from specification to price ladder</a></li>
+<li><a href="#6-how-the-price-is-calculated">How the price is calculated</a></li>
+<li><a href="#7-good-to-know">Good to know</a></li>
+<li><a href="#8-roles-and-permissions">Roles and permissions</a></li>
+<li><a href="#9-coming-next">Coming next</a></li>
+<li><a href="#10-known-limitations">Known limitations</a></li>
+<li><a href="#11-change-log">Change log</a></li>
+</ol>
+<hr>
+<h2 id="1-what-the-mvp-does">1. What the MVP does</h2>
+<p>Packaging and print companies receive many requests for custom products: boxes, labels, wraps. Each request needs a technical description, a reliable cost calculation, a price for several order quantities, and—once the customer accepts—production.</p>
+<p>The goal of the MVP is that a user can, <strong>within a few minutes</strong>:</p>
+<ol>
+<li>Describe a custom packaging product in a <strong>Packaging Specification</strong>.</li>
+<li>Calculate its <strong>cost and sales price</strong> for a range of order quantities.</li>
+<li>Create a <strong>Sales Quote</strong> from the chosen price. 🔜</li>
+<li>Turn the accepted quote into a <strong>Sales Order</strong>. 🔜</li>
+<li>Generate the <strong>Production Order</strong>, including the bill of materials and routing. 🔜</li>
+</ol>
+<p>The accelerator does not replace Business Central processes. Sales, manufacturing, inventory, and finance continue to run on the <strong>standard Business Central documents</strong>. The accelerator adds the packaging-specific steps in front of them.</p>
+<hr>
+<h2 id="2-end-to-end-process-and-feature-status">2. End-to-end process and feature status</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Process step</th>
+<th>Where it happens</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Customer request</td>
+<td>Outside the system</td>
+<td>–</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Packaging specification</td>
+<td>Packaging Specification card</td>
+<td>✅ Available (Phase 1)</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Finished item creation</td>
+<td>Automatic on release of the specification</td>
+<td>✅ Available (Phase 2)</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Material and production cost calculation</td>
+<td>Packaging Cost Sheet</td>
+<td>✅ Available (Phase 2)</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Sales price calculation (price ladder)</td>
+<td>Packaging Cost Sheet</td>
+<td>✅ Available (Phase 2)</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Sales Quote</td>
+<td>Packaging Quote Wizard → standard Sales Quote</td>
+<td>🔜 Phase 3</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Customer approval → Sales Order</td>
+<td>Standard Business Central</td>
+<td>🔜 Phase 3</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Production BOM and routing generation</td>
+<td>Packaging BOM, routing templates</td>
+<td>🔜 Phase 4</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Production Order</td>
+<td>Action on the Sales Order</td>
+<td>🔜 Phase 5</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Consumption, output, shipment, invoice</td>
+<td>Standard Business Central</td>
+<td>Standard</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="3-key-concepts">3. Key concepts</h2>
+<table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Packaging Specification</strong></td>
+<td>The technical description of one custom product: dimensions, material, print process, number of colors, lamination, die cutting, and expected waste.</td>
+</tr>
+<tr>
+<td><strong>Finished item</strong></td>
+<td>A standard Business Central item that represents the product. It is created automatically when the specification is released and is used later on quotes, orders, and production orders.</td>
+</tr>
+<tr>
+<td><strong>Packaging material</strong></td>
+<td>A standard item marked with a <em>Packaging Material Type</em> (Paper, Corrugated, Ink, Glue, Foil, Film) and a <em>Cost per m²</em>.</td>
+</tr>
+<tr>
+<td><strong>Print Cost Matrix</strong></td>
+<td>The printing, machine setup, and labor rates for each print process (Digital, Offset, Flexo, Screen).</td>
+</tr>
+<tr>
+<td><strong>Cost Sheet</strong></td>
+<td>The calculation of one specification: a breakdown of the cost per piece plus a <strong>price ladder</strong>.</td>
+</tr>
+<tr>
+<td><strong>Price ladder</strong></td>
+<td>Unit cost and unit price for several order quantities. The default quantities are 100, 500, 1,000, 5,000, and 10,000 pieces.</td>
+</tr>
+<tr>
+<td><strong>Variable cost</strong></td>
+<td>Costs that apply to every piece: material, ink, glue, lamination, printing, and labor.</td>
+</tr>
+<tr>
+<td><strong>Fixed cost</strong></td>
+<td>Costs that apply once per order: machine setup and the cutting die. They are spread over the order quantity, so larger orders get a lower unit cost.</td>
+</tr>
+<tr>
+<td><strong>Margin %</strong></td>
+<td>A markup on cost: <em>Unit Price = Unit Cost × (1 + Margin % / 100)</em>. Each customer can have a default packaging margin.</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="4-one-time-setup">4. One-time setup</h2>
+<p>Complete these steps once before the first calculation. Search for each page with <strong>Tell me</strong> (Alt+Q). All amounts are in local currency (LCY).</p>
+<blockquote>
+<p>The values below are <strong>example values</strong> used throughout this document. Replace them with your own rates.</p>
+</blockquote>
+<h3 id="step-41-number-series">Step 4.1 – Number series</h3>
+<p>Create three number series on the <strong>No. Series</strong> page:</p>
+<table>
+<thead>
+<tr>
+<th>Purpose</th>
+<th>Example code</th>
+<th>Example first number</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Packaging specifications</td>
+<td><code>PP-SPEC</code></td>
+<td><code>SPEC0001</code></td>
+</tr>
+<tr>
+<td>Cost sheets</td>
+<td><code>PP-COST</code></td>
+<td><code>CS0001</code></td>
+</tr>
+<tr>
+<td>Finished packaging items</td>
+<td><code>PP-ITEM</code></td>
+<td><code>PPI0001</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="step-42-packaging-materials">Step 4.2 – Packaging materials</h3>
+<p>Create or update the material items, and fill in the <strong>Packaging</strong> section of the item card.</p>
+<table>
+<thead>
+<tr>
+<th>Item no.</th>
+<th>Description</th>
+<th>Packaging Material Type</th>
+<th>Cost per m²</th>
+<th>Unit Cost</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>MAT-CB-E</code></td>
+<td>Corrugated board, E-flute, white</td>
+<td>Corrugated</td>
+<td>2.50</td>
+<td>–</td>
+</tr>
+<tr>
+<td><code>INK-BLACK</code></td>
+<td>Printing ink (per liter)</td>
+<td>Ink</td>
+<td>–</td>
+<td>20.00</td>
+</tr>
+<tr>
+<td><code>GLUE-01</code></td>
+<td>Hot-melt glue (per kg)</td>
+<td>Glue</td>
+<td>–</td>
+<td>4.00</td>
+</tr>
+<tr>
+<td><code>FILM-GLOSS</code></td>
+<td>Gloss lamination film</td>
+<td>Film</td>
+<td>1.00</td>
+<td>–</td>
+</tr>
+</tbody>
+</table>
+<p>Only items with a Packaging Material Type can be selected as the material of a specification. The item's GSM (grams per square meter) is copied to the specification automatically.</p>
+<h3 id="step-43-packaging-setup">Step 4.3 – Packaging Setup</h3>
+<p>Open <strong>Packaging Setup</strong> and fill in:</p>
+<table>
+<thead>
+<tr>
+<th>Section</th>
+<th>Field</th>
+<th>Example value</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Numbering</td>
+<td>Packaging Spec. Nos.</td>
+<td><code>PP-SPEC</code></td>
+<td>Numbers new specifications.</td>
+</tr>
+<tr>
+<td>Numbering</td>
+<td>Cost Sheet Nos.</td>
+<td><code>PP-COST</code></td>
+<td>Numbers new cost sheets.</td>
+</tr>
+<tr>
+<td>Item Creation</td>
+<td>Item Nos.</td>
+<td><code>PP-ITEM</code></td>
+<td>Numbers the finished items.</td>
+</tr>
+<tr>
+<td>Item Creation</td>
+<td>Item Template Code</td>
+<td><code>PACKAGING</code></td>
+<td>Applied to new finished items. Recommended: the template should set the base unit of measure and posting groups.</td>
+</tr>
+<tr>
+<td>Consumption</td>
+<td>Ink Item No.</td>
+<td><code>INK-BLACK</code></td>
+<td>Its unit cost prices the ink.</td>
+</tr>
+<tr>
+<td>Consumption</td>
+<td>Ink Qty. per m² per Color</td>
+<td>0.01</td>
+<td>Liters of ink per m² for each color.</td>
+</tr>
+<tr>
+<td>Consumption</td>
+<td>Glue Item No.</td>
+<td><code>GLUE-01</code></td>
+<td>Its unit cost prices the glue.</td>
+</tr>
+<tr>
+<td>Consumption</td>
+<td>Glue Qty. per Piece</td>
+<td>0.005</td>
+<td>Kilograms of glue per piece.</td>
+</tr>
+<tr>
+<td>Consumption</td>
+<td>Lamination Film Item No.</td>
+<td><code>FILM-GLOSS</code></td>
+<td>Its cost per m² prices the film.</td>
+</tr>
+<tr>
+<td>Consumption</td>
+<td>Lamination Cost per Piece</td>
+<td>0.03</td>
+<td>Lamination process cost per piece.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="step-44-print-cost-matrix">Step 4.4 – Print Cost Matrix</h3>
+<p>From Packaging Setup choose <strong>Print Cost Matrix</strong>, and enter one line per print process you use:</p>
+<table>
+<thead>
+<tr>
+<th>Print Process</th>
+<th>Print Cost per Piece</th>
+<th>Machine Setup Cost (per order)</th>
+<th>Labor Cost per Piece</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Digital</td>
+<td>0.02</td>
+<td>100.00</td>
+<td>0.05</td>
+</tr>
+<tr>
+<td>Offset</td>
+<td>0.01</td>
+<td>250.00</td>
+<td>0.03</td>
+</tr>
+<tr>
+<td>Flexo</td>
+<td>0.015</td>
+<td>400.00</td>
+<td>0.02</td>
+</tr>
+</tbody>
+</table>
+<p>The printing prices per piece come from the MVP specification. The setup and labor values are examples.</p>
+<h3 id="step-45-customer-margin">Step 4.5 – Customer margin</h3>
+<p>On each customer card, fill in <strong>Packaging Margin %</strong> in the <strong>Packaging</strong> section. In the example, customer <code>C-PIZZA</code> (Pizza Kft.) has a margin of <strong>20%</strong>.</p>
+<hr>
+<h2 id="5-worked-example-from-specification-to-price-ladder">5. Worked example: from specification to price ladder</h2>
+<p><strong>Scenario:</strong> Pizza Kft. asks for a printed, laminated takeaway food box with a custom cutting die.</p>
+<h3 id="step-51-create-the-packaging-specification">Step 5.1 – Create the packaging specification</h3>
+<p>Open <strong>Packaging Specifications</strong>, choose <strong>New</strong>, and fill in the card:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>No.</td>
+<td><em>(leave blank – assigned from <code>PP-SPEC</code>, e.g. <code>SPEC0001</code>)</em></td>
+</tr>
+<tr>
+<td>Description</td>
+<td>Takeaway food box, 2-color print</td>
+</tr>
+<tr>
+<td>Customer No.</td>
+<td><code>C-PIZZA</code></td>
+</tr>
+<tr>
+<td>Width (mm)</td>
+<td>200</td>
+</tr>
+<tr>
+<td>Length (mm)</td>
+<td>400</td>
+</tr>
+<tr>
+<td>Height (mm)</td>
+<td>300</td>
+</tr>
+<tr>
+<td>Material Code</td>
+<td><code>MAT-CB-E</code> <em>(GSM is copied from the item)</em></td>
+</tr>
+<tr>
+<td>Print Process</td>
+<td>Digital</td>
+</tr>
+<tr>
+<td>No. of Colors</td>
+<td>2</td>
+</tr>
+<tr>
+<td>Lamination</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Die Cut</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Die Cost</td>
+<td>500.00</td>
+</tr>
+<tr>
+<td>Waste %</td>
+<td>10</td>
+</tr>
+</tbody>
+</table>
+<h3 id="step-52-release-the-specification">Step 5.2 – Release the specification</h3>
+<p>Set <strong>Status</strong> to <strong>Released</strong>. The system creates the finished item automatically:</p>
+<table>
+<thead>
+<tr>
+<th>Item field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>No.</td>
+<td><code>PPI0001</code> (from <code>PP-ITEM</code>)</td>
+</tr>
+<tr>
+<td>Description</td>
+<td>Takeaway food box, 2-color print</td>
+</tr>
+<tr>
+<td>Replenishment System</td>
+<td>Prod. Order</td>
+</tr>
+<tr>
+<td>Manufacturing Policy</td>
+<td>Make-to-Order</td>
+</tr>
+<tr>
+<td>Packaging Spec. No.</td>
+<td><code>SPEC0001</code></td>
+</tr>
+</tbody>
+</table>
+<p>The specification's <strong>Item No.</strong> now shows <code>PPI0001</code>. A released specification stays editable.</p>
+<h3 id="step-53-create-the-cost-sheet">Step 5.3 – Create the cost sheet</h3>
+<p>On the specification card, choose <strong>Create Cost Sheet</strong>. A new cost sheet (for example <code>CS0001</code>) opens:</p>
+<ul>
+<li>It is linked to <code>SPEC0001</code> and customer <code>C-PIZZA</code>.</li>
+<li><strong>Margin %</strong> is <strong>20</strong>, taken from the customer.</li>
+<li>The <strong>Calculation Basis</strong> section shows the specification values used, so later changes to the specification don't silently change this calculation.</li>
+</ul>
+<h3 id="step-54-review-the-unit-cost-breakdown">Step 5.4 – Review the unit cost breakdown</h3>
+<p>The <strong>Unit Cost Breakdown</strong> section shows the cost of one piece:</p>
+<table>
+<thead>
+<tr>
+<th>Line</th>
+<th>How it is calculated</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Base Area (m²)</td>
+<td>300 × 200 / 1,000,000</td>
+<td>0.06</td>
+</tr>
+<tr>
+<td>Required Area (m²)</td>
+<td>0.06 × (100 + 10) / 100</td>
+<td>0.066</td>
+</tr>
+<tr>
+<td>Material Cost</td>
+<td>0.066 m² × 2.50 per m²</td>
+<td>0.165</td>
+</tr>
+<tr>
+<td>Ink Cost</td>
+<td>0.066 m² × 0.01 l × 2 colors × 20.00 per l</td>
+<td>0.0264</td>
+</tr>
+<tr>
+<td>Glue Cost</td>
+<td>0.005 kg × 4.00 per kg</td>
+<td>0.02</td>
+</tr>
+<tr>
+<td>Lamination Cost</td>
+<td>0.066 m² × 1.00 per m² + 0.03</td>
+<td>0.096</td>
+</tr>
+<tr>
+<td>Printing Cost</td>
+<td>Print Cost Matrix, Digital</td>
+<td>0.02</td>
+</tr>
+<tr>
+<td>Labor Cost</td>
+<td>Print Cost Matrix, Digital</td>
+<td>0.05</td>
+</tr>
+<tr>
+<td><strong>Variable Unit Cost</strong></td>
+<td>Sum of the lines above</td>
+<td><strong>0.3774</strong></td>
+</tr>
+<tr>
+<td>Machine Setup Cost</td>
+<td>Print Cost Matrix, Digital (per order)</td>
+<td>100.00</td>
+</tr>
+<tr>
+<td>Die Cost</td>
+<td>From the specification, because Die Cut = Yes (per order)</td>
+<td>500.00</td>
+</tr>
+<tr>
+<td><strong>Fixed Cost</strong></td>
+<td>Machine setup + die</td>
+<td><strong>600.00</strong></td>
+</tr>
+</tbody>
+</table>
+<h3 id="step-55-review-the-price-ladder">Step 5.5 – Review the price ladder</h3>
+<p>The <strong>Price Ladder</strong> lines show how the price drops as the fixed cost is spread over more pieces (margin 20%):</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Quantity</th>
+<th style="text-align: right;">Fixed Cost per Piece</th>
+<th style="text-align: right;">Unit Cost</th>
+<th style="text-align: right;">Unit Price</th>
+<th style="text-align: right;">Line Amount</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">100</td>
+<td style="text-align: right;">6.00</td>
+<td style="text-align: right;">6.3774</td>
+<td style="text-align: right;">7.65288</td>
+<td style="text-align: right;">765.288</td>
+</tr>
+<tr>
+<td style="text-align: right;">500</td>
+<td style="text-align: right;">1.20</td>
+<td style="text-align: right;">1.5774</td>
+<td style="text-align: right;">1.89288</td>
+<td style="text-align: right;">946.44</td>
+</tr>
+<tr>
+<td style="text-align: right;">1,000</td>
+<td style="text-align: right;">0.60</td>
+<td style="text-align: right;">0.9774</td>
+<td style="text-align: right;"><strong>1.17288</strong></td>
+<td style="text-align: right;">1,172.88</td>
+</tr>
+<tr>
+<td style="text-align: right;">5,000</td>
+<td style="text-align: right;">0.12</td>
+<td style="text-align: right;">0.4974</td>
+<td style="text-align: right;">0.59688</td>
+<td style="text-align: right;">2,984.40</td>
+</tr>
+<tr>
+<td style="text-align: right;">10,000</td>
+<td style="text-align: right;">0.06</td>
+<td style="text-align: right;">0.4374</td>
+<td style="text-align: right;">0.52488</td>
+<td style="text-align: right;">5,248.80</td>
+</tr>
+</tbody>
+</table>
+<p>Example for 1,000 pieces: 600 / 1,000 = 0.60 fixed cost per piece; 0.3774 + 0.60 = 0.9774 unit cost; 0.9774 × 1.20 = <strong>1.17288</strong> unit price.</p>
+<blockquote>
+<p>The same figures are used in an automated test of the calculation.</p>
+</blockquote>
+<h3 id="step-56-adjust-and-recalculate">Step 5.6 – Adjust and recalculate</h3>
+<table>
+<thead>
+<tr>
+<th>You want to…</th>
+<th>Do this</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Offer a different margin</td>
+<td>Change <strong>Margin %</strong>, e.g. to 25</td>
+<td>All unit prices and line amounts update immediately.</td>
+</tr>
+<tr>
+<td>Price a quantity that isn't in the ladder</td>
+<td>Add a line, e.g. Quantity 2,500</td>
+<td>The line is calculated as soon as the quantity is entered.</td>
+</tr>
+<tr>
+<td>Use updated rates or a changed specification</td>
+<td>Choose <strong>Calculate</strong></td>
+<td>All costs and the ladder are recalculated from the current specification and rates.</td>
+</tr>
+<tr>
+<td>See all calculations for a product</td>
+<td>On the specification, choose <strong>Cost Sheets</strong></td>
+<td>Lists every cost sheet for that specification.</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="6-how-the-price-is-calculated">6. How the price is calculated</h2>
+<p>For each piece, with order quantity <strong>Q</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Formula</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Base Area (m²)</td>
+<td>Height (mm) × Width (mm) / 1,000,000</td>
+</tr>
+<tr>
+<td>Required Area (m²)</td>
+<td>Base Area × (100 + Waste %) / 100</td>
+</tr>
+<tr>
+<td>Material Cost</td>
+<td>Required Area × material Cost per m²</td>
+</tr>
+<tr>
+<td>Ink Cost</td>
+<td>Required Area × Ink Qty. per m² per Color × No. of Colors × ink Unit Cost</td>
+</tr>
+<tr>
+<td>Glue Cost</td>
+<td>Glue Qty. per Piece × glue Unit Cost</td>
+</tr>
+<tr>
+<td>Lamination Cost <em>(only if Lamination)</em></td>
+<td>Required Area × film Cost per m² + Lamination Cost per Piece</td>
+</tr>
+<tr>
+<td>Printing Cost</td>
+<td>Print Cost per Piece of the print process</td>
+</tr>
+<tr>
+<td>Labor Cost</td>
+<td>Labor Cost per Piece of the print process</td>
+</tr>
+<tr>
+<td><strong>Variable Unit Cost</strong></td>
+<td>Sum of the components above</td>
+</tr>
+<tr>
+<td><strong>Fixed Cost</strong></td>
+<td>Machine Setup Cost of the print process + Die Cost <em>(only if Die Cut)</em></td>
+</tr>
+<tr>
+<td>Fixed Cost per Piece</td>
+<td>Fixed Cost / Q</td>
+</tr>
+<tr>
+<td><strong>Unit Cost</strong></td>
+<td>Variable Unit Cost + Fixed Cost per Piece</td>
+</tr>
+<tr>
+<td><strong>Unit Price</strong></td>
+<td>Unit Cost × (1 + Margin % / 100)</td>
+</tr>
+<tr>
+<td>Line Amount</td>
+<td>Unit Price × Q</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="7-good-to-know">7. Good to know</h2>
+<ul>
+<li><strong>Required data:</strong> a calculation needs a material, a width, a height, and a print process on the specification, plus a Print Cost Matrix line for that print process. Missing data is reported with a clear message.</li>
+<li><strong>Consumption settings are optional:</strong> if an ink or glue quantity is 0 in Packaging Setup, that cost is 0. If a quantity is filled in, the matching item must also be filled in.</li>
+<li><strong>Die cost</strong> is charged on every order when the specification uses die cutting.</li>
+<li><strong>Customer margin:</strong> if the customer has no packaging margin, the cost sheet starts with 0%. Check the margin before you send a price.</li>
+<li><strong>Snapshot:</strong> a cost sheet keeps the values it was calculated with. After changing the specification or rates, choose <strong>Calculate</strong> to update it. Selecting a different specification on a cost sheet clears its calculation date until it's recalculated.</li>
+<li><strong>Released specifications remain editable.</strong> Releasing creates the finished item only once.</li>
+</ul>
+<hr>
+<h2 id="8-roles-and-permissions">8. Roles and permissions</h2>
+<table>
+<thead>
+<tr>
+<th>Permission set</th>
+<th>Intended for</th>
+<th>Can do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>PP_USER</strong></td>
+<td>Sales and calculation staff</td>
+<td>Create and maintain specifications and cost sheets; release specifications (creates the finished item); read setup and rates.</td>
+</tr>
+<tr>
+<td><strong>PP_POWERUSER</strong></td>
+<td>Key users</td>
+<td>Everything in PP_USER, plus maintain Packaging Setup, the Print Cost Matrix, and customer packaging margins.</td>
+</tr>
+<tr>
+<td><strong>PP_ADMIN</strong></td>
+<td>Administrators</td>
+<td>Everything in PP_POWERUSER, plus full item maintenance.</td>
+</tr>
+</tbody>
+</table>
+<p>Users also need the standard Business Central permissions for their role, for example for working with items and customers.</p>
+<hr>
+<h2 id="9-coming-next">9. Coming next</h2>
+<h3 id="91-phase-3-quote-wizard-and-sales-quote">9.1 Phase 3 – Quote Wizard and Sales Quote 🔜</h3>
+<p>A guided wizard: select the customer, select the specification, choose a quantity from the price ladder, run the calculation, and create a standard <strong>Sales Quote</strong> with the finished item and the calculated unit price. The accepted quote is turned into a Sales Order with the standard <em>Make Order</em> function.</p>
+<h3 id="92-phase-4-production-bom-and-routing">9.2 Phase 4 – Production BOM and routing 🔜</h3>
+<p>From the specification, the system generates a <strong>Production BOM</strong> (board, ink, glue, film) and a <strong>Routing</strong> from templates such as <code>BOX_STD</code> (Printing → Die Cutting → Folding → Gluing → Packing), <code>LABEL_STD</code>, and <code>DIGITAL_STD</code>.</p>
+<h3 id="93-phase-5-production-order">9.3 Phase 5 – Production order 🔜</h3>
+<p>A <strong>Create Packaging Production</strong> action on the Sales Order generates the BOM and routing, if needed, and creates the <strong>Production Order</strong> as <em>Firm Planned</em> or <em>Released</em>, depending on the setup.</p>
+<hr>
+<h2 id="10-known-limitations">10. Known limitations</h2>
+<table>
+<thead>
+<tr>
+<th>Topic</th>
+<th>Current behavior</th>
+<th>Impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Material area</td>
+<td>Uses Height × Width only, as defined in the MVP specification; Length is not used.</td>
+<td>Accurate for flat products such as labels. For boxes, the flat blank is larger than Height × Width, so material cost may be understated.</td>
+</tr>
+<tr>
+<td>Print cost</td>
+<td>One rate per print process; the number of colors and the quantity don't change the rate.</td>
+<td>Colors still affect the ink cost.</td>
+</tr>
+<tr>
+<td>Currency</td>
+<td>All rates and prices are in local currency (LCY).</td>
+<td>Quotes in foreign currency are not handled yet.</td>
+</tr>
+<tr>
+<td>Rounding</td>
+<td>Unit prices keep up to 5 decimals on the cost sheet.</td>
+<td>Rounding to sales prices will be handled when the quote is created (Phase 3).</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="11-change-log">11. Change log</h2>
+<table>
+<thead>
+<tr>
+<th>Version</th>
+<th>Date</th>
+<th>Change</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0.2</td>
+<td>2026-10-30</td>
+<td>Phase 2: finished item on release, Print Cost Matrix, consumption setup, customer margin, cost sheet with price ladder.</td>
+</tr>
+<tr>
+<td>0.1</td>
+<td>2026-10-29</td>
+<td>Phase 1: packaging specification, material fields on items, setup, permission sets.</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h3 id="maintaining-this-document">Maintaining this document</h3>
+<p><code>MVP-Introduction.md</code> is the source. After editing it, regenerate the HTML version from the app folder (<code>Vib Print &amp; Packing</code>):</p>
+<pre><code class="language-powershell">python -m pip install markdown   # once
+python docs/build_html.py
+</code></pre>
+<p>When a phase is delivered: update the status in chapters 2 and 9, add a setup step and a worked-example step, and add a change log line.</p>
+</body>
+</html>

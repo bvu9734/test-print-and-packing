@@ -54,12 +54,16 @@ table 50100 "CCO Packaging Specification"
         MaterialItem: Record Item;
         PackagingItemTypeErr: Label 'Item %1 must be assigned a packaging material type.';
       begin
-        if "Material Code" = '' then
+        if "Material Code" = '' then begin
+          "Material GSM" := 0;
           exit;
+        end;
 
         MaterialItem.Get("Material Code");
         if MaterialItem."CCO Packaging Material Type" = MaterialItem."CCO Packaging Material Type"::None then
           Error(PackagingItemTypeErr, MaterialItem."No.");
+
+        "Material GSM" := MaterialItem."CCO Material GSM";
       end;
     }
     field(8; "Material GSM"; Decimal)
@@ -101,8 +105,32 @@ table 50100 "CCO Packaging Specification"
     field(14; Status; Enum "CCO Spec. Status")
     {
       Caption = 'Status';
-      ToolTip = 'Specifies whether the specification is a draft or released. Released specifications remain editable.', Comment = 'hu-HU=Megadja, hogy a specifikáció piszkozat vagy kiadott állapotú. A kiadott specifikációk továbbra is szerkeszthetők.';
+      ToolTip = 'Specifies whether the specification is a draft or released. Releasing a specification creates its finished item if no item is linked yet. Released specifications remain editable.', Comment = 'hu-HU=Megadja, hogy a specifikáció piszkozat vagy kiadott állapotú. Kiadáskor létrejön a késztermék cikk, ha még nincs hozzárendelve. A kiadott specifikációk továbbra is szerkeszthetők.';
       DataClassification = CustomerContent;
+
+      trigger OnValidate()
+      var
+        SpecItemMgt: Codeunit "CCO Spec. Item Mgt.";
+      begin
+        if (Status = Status::Released) and ("Item No." = '') then
+          SpecItemMgt.CreateItem(Rec);
+      end;
+    }
+    field(15; "Die Cost"; Decimal)
+    {
+      Caption = 'Die Cost';
+      ToolTip = 'Specifies the die cost charged on every order when the packaging requires die cutting. It is spread over the order quantity.', Comment = 'hu-HU=Megadja a stancszerszám költségét, amelyet stancolást igénylő csomagolásnál minden rendelésre felszámítunk. A költséget a rendelési mennyiségre osztjuk szét.';
+      DataClassification = CustomerContent;
+      DecimalPlaces = 0 : 5;
+      MinValue = 0;
+    }
+    field(16; "Item No."; Code[20])
+    {
+      Caption = 'Item No.';
+      ToolTip = 'Specifies the finished item created for this specification when it was released.', Comment = 'hu-HU=Megadja a specifikáció kiadásakor létrehozott késztermék cikket.';
+      DataClassification = CustomerContent;
+      TableRelation = Item;
+      Editable = false;
     }
   }
 

@@ -5,5 +5,5 @@ permissionset 50119 "PP_ADMIN"
   IncludedPermissionSets = "PP_POWERUSER";
 
   Permissions =
-    tabledata Item = RM;
+    tabledata Item = RIMD;
 }

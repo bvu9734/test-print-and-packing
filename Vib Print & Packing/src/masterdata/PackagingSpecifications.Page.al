@@ -37,6 +37,10 @@ page 50113 "CCO Packaging Specifications"
         {
           ApplicationArea = All;
         }
+        field("Item No."; Rec."Item No.")
+        {
+          ApplicationArea = All;
+        }
       }
     }
   }

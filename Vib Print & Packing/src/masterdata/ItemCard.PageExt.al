@@ -28,6 +28,10 @@ pageextension 50116 "CCO Item Card Ext." extends "Item Card"
         {
           ApplicationArea = All;
         }
+        field("CCO Packaging Spec. No."; Rec."CCO Packaging Spec. No.")
+        {
+          ApplicationArea = All;
+        }
       }
     }
   }

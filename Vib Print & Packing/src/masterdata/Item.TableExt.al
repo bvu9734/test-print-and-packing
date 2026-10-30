@@ -32,5 +32,13 @@ tableextension 50112 "CCO Item Ext." extends Item
       ToolTip = 'Specifies the cost of one square meter of the material.', Comment = 'hu-HU=Megadja az anyag egy négyzetméterének költségét.';
       DataClassification = CustomerContent;
     }
+    field(50105; "CCO Packaging Spec. No."; Code[20])
+    {
+      Caption = 'Packaging Spec. No.';
+      ToolTip = 'Specifies the packaging specification that this finished item was created from.', Comment = 'hu-HU=Megadja a csomagolási specifikációt, amelyből ez a késztermék cikk létrejött.';
+      DataClassification = CustomerContent;
+      TableRelation = "CCO Packaging Specification";
+      Editable = false;
+    }
   }
 }

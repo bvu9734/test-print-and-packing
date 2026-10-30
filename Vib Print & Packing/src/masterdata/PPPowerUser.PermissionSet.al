@@ -6,6 +6,10 @@ permissionset 50118 "PP_POWERUSER"
 
   Permissions =
     tabledata "CCO Packaging Setup" = RIMD,
+    tabledata "CCO Print Cost Matrix" = RIMD,
+    tabledata Customer = RM,
     page "CCO Packaging Setup" = X,
-    page "No. Series" = X;
+    page "CCO Print Cost Matrix" = X,
+    page "No. Series" = X,
+    page "Customer Card" = X;
 }

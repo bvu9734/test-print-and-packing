@@ -12,21 +12,33 @@
   "logo": "",
   "dependencies": [
     {
-      "version": "22.0.0.0",
+      "id": "8addca37-b1ad-425e-8ce2-a0743bd69649",
+      "name": "COSMO Print & Packaging Accelerator",
+      "publisher": "COSMO HU",
+      "version": "1.0.0.0"
+    },
+    {
+      "version": "29.0.0.0",
       "publisher": "Microsoft",
       "name": "Library Assert",
       "id": "dd0be2ea-f733-4d65-bb34-a28f4624fb14"
     },
     {
-      "version": "22.0.0.0",
+      "version": "29.0.0.0",
       "publisher": "Microsoft",
       "name": "Any",
       "id": "e7320ebb-08b3-4406-b1ec-b4927d3e280b"
+    },
+    {
+      "version": "29.0.0.0",
+      "publisher": "Microsoft",
+      "name": "Test Runner",
+      "id": "23de40a6-dfe8-4f80-80db-d70f83ce8caf"
     }
   ],
   "screenshots": [],
   "platform": "1.0.0.0",
-  "application": "22.0.0.0",
+  "application": "29.0.0.0",
   "idRanges": [
     {
       "from": 50200,
