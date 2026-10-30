@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Product** | COSMO Print & Packaging Accelerator for Microsoft Dynamics 365 Business Central |
-| **Document version** | 0.4 |
+| **Document version** | 0.5 |
 | **Last updated** | 2026-10-30 |
 | **Covers** | Phase 1 – Packaging master data, Phase 2 – Cost calculation, Phase 3 – Quote Wizard, Packaging Worksheet, and Sales Quote |
 | **Audience** | Business users, key users, and customer stakeholders |
@@ -82,6 +82,8 @@ The accelerator does not replace Business Central processes. Sales, manufacturin
 ## 4. One-time setup
 
 Complete these steps once before the first calculation. Search for each page with **Tell me** (Alt+Q). All amounts are in local currency (LCY).
+
+> **Quick start for testing:** In a test or sandbox company, open **Packaging Setup** and choose **Generate Demo Data**. It creates the number series, setup values, Print Cost Matrix, item template `PACKAGING`, one material item for every material type (codes `PP-PAPER`, `PP-CORRUGATED`, `PP-INK`, `PP-GLUE`, `PP-FOIL`, `PP-FILM`, with random costs), the customers `PP-PIZZA` and `PP-BURGER`, sample specifications `PP-DEMO-…` (four released and one draft), and the worksheet batch `DEMO` with four priced lines. You can run it again: existing demo records and filled-in setup fields are kept. Posting groups are copied from an existing item and customer.
 
 > The values below are **example values** used throughout this document. Replace them with your own rates.
 
@@ -451,7 +453,7 @@ On the **sales quote**, the unit price is then converted to the customer's curre
 |---|---|---|
 | **PP_USER** | Sales and calculation staff | Create and maintain specifications and cost sheets; release specifications (creates the finished item); run the Packaging Quote Wizard; work in the Packaging Worksheet and its batches; read setup and rates. |
 | **PP_POWERUSER** | Key users | Everything in PP_USER, plus maintain Packaging Setup, the Print Cost Matrix, and customer packaging margins. |
-| **PP_ADMIN** | Administrators | Everything in PP_POWERUSER, plus full item maintenance. |
+| **PP_ADMIN** | Administrators | Everything in PP_POWERUSER, plus full item maintenance and **Generate Demo Data**. |
 
 Users also need the standard Business Central permissions for their role, for example for working with items, customers, and sales quotes and orders.
 
@@ -485,6 +487,7 @@ A **Create Packaging Production** action on the Sales Order generates the BOM an
 
 | Version | Date | Change |
 |---|---|---|
+| 0.5 | 2026-10-30 | Generate Demo Data action on Packaging Setup for manual testing. |
 | 0.4 | 2026-10-30 | Phase 3: Packaging Worksheet with worksheet batches—quote several specifications at once, one sales quote per customer. |
 | 0.3 | 2026-10-30 | Phase 3: Packaging Quote Wizard, standard Sales Quote with the calculated price, custom quantities, links between quote line, specification, and cost sheet. |
 | 0.2 | 2026-10-30 | Phase 2: finished item on release, Print Cost Matrix, consumption setup, customer margin, cost sheet with price ladder. |

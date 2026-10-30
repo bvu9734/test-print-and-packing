@@ -61,7 +61,7 @@
 </tr>
 <tr>
 <td><strong>Document version</strong></td>
-<td>0.4</td>
+<td>0.5</td>
 </tr>
 <tr>
 <td><strong>Last updated</strong></td>
@@ -241,6 +241,7 @@
 <h2 id="4-one-time-setup">4. One-time setup</h2>
 <p>Complete these steps once before the first calculation. Search for each page with <strong>Tell me</strong> (Alt+Q). All amounts are in local currency (LCY).</p>
 <blockquote>
+<p><strong>Quick start for testing:</strong> In a test or sandbox company, open <strong>Packaging Setup</strong> and choose <strong>Generate Demo Data</strong>. It creates the number series, setup values, Print Cost Matrix, item template <code>PACKAGING</code>, one material item for every material type (codes <code>PP-PAPER</code>, <code>PP-CORRUGATED</code>, <code>PP-INK</code>, <code>PP-GLUE</code>, <code>PP-FOIL</code>, <code>PP-FILM</code>, with random costs), the customers <code>PP-PIZZA</code> and <code>PP-BURGER</code>, sample specifications <code>PP-DEMO-…</code> (four released and one draft), and the worksheet batch <code>DEMO</code> with four priced lines. You can run it again: existing demo records and filled-in setup fields are kept. Posting groups are copied from an existing item and customer.</p>
 <p>The values below are <strong>example values</strong> used throughout this document. Replace them with your own rates.</p>
 </blockquote>
 <h3 id="step-41-number-series">Step 4.1 – Number series</h3>
@@ -1229,7 +1230,7 @@
 <tr>
 <td><strong>PP_ADMIN</strong></td>
 <td>Administrators</td>
-<td>Everything in PP_POWERUSER, plus full item maintenance.</td>
+<td>Everything in PP_POWERUSER, plus full item maintenance and <strong>Generate Demo Data</strong>.</td>
 </tr>
 </tbody>
 </table>
@@ -1289,6 +1290,11 @@
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>0.5</td>
+<td>2026-10-30</td>
+<td>Generate Demo Data action on Packaging Setup for manual testing.</td>
+</tr>
 <tr>
 <td>0.4</td>
 <td>2026-10-30</td>

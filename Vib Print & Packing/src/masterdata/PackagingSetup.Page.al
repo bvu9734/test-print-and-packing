@@ -70,6 +70,29 @@ page 50115 "CCO Packaging Setup"
 
   actions
   {
+    area(Processing)
+    {
+      action(GenerateDemoData)
+      {
+        ApplicationArea = All;
+        Caption = 'Generate Demo Data';
+        Image = CreateDocuments;
+        ToolTip = 'Create demo master data for manual testing: number series, setup values, print rates, an item template, one material item per material type, customers, specifications, and a worksheet batch. Existing demo records and filled setup fields are kept.', Comment = 'hu-HU=Bemutató törzsadatok létrehozása kézi teszteléshez: számsorok, beállítási értékek, nyomtatási díjak, cikksablon, anyagtípusonként egy anyagcikk, vevők, specifikációk és egy munkalap köteg. A meglévő bemutató rekordok és a kitöltött beállítási mezők megmaradnak.';
+
+        trigger OnAction()
+        var
+          PackagingDemoData: Codeunit "CCO Packaging Demo Data";
+          GenerationSummary: Text;
+        begin
+          if not Confirm(GenerateDemoDataQst, false) then
+            exit;
+          CurrPage.SaveRecord();
+          GenerationSummary := PackagingDemoData.Generate();
+          CurrPage.Update(false);
+          Message(GenerationSummary);
+        end;
+      }
+    }
     area(Navigation)
     {
       action(PrintCostMatrix)
@@ -96,4 +119,7 @@ page 50115 "CCO Packaging Setup"
       Rec.Insert();
     end;
   end;
+
+  var
+    GenerateDemoDataQst: Label 'This creates demo master data for the packaging feature, including items, customers, specifications, and a worksheet batch. Use it only in a test or sandbox company.\\Do you want to continue?';
 }
