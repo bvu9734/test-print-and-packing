@@ -132,6 +132,13 @@ table 50100 "CCO Packaging Specification"
       TableRelation = Item;
       Editable = false;
     }
+    field(17; "Routing Template Code"; Code[20])
+    {
+      Caption = 'Routing Template Code';
+      ToolTip = 'Specifies the routing template used to generate the routing. If blank, the default from Packaging Setup is used: the digital template for digital printing, the box template for die-cut products, and the label template for all others.', Comment = 'hu-HU=Megadja a műveleti terv generálásához használt műveleti sablont. Ha üres, a Csomagolási beállítás alapértéke érvényes: digitális nyomtatásnál a digitális, stancolt termékeknél a doboz, minden más esetben a címke sablon.';
+      DataClassification = CustomerContent;
+      TableRelation = "CCO Routing Template";
+    }
   }
 
   keys

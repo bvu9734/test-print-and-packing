@@ -3,9 +3,9 @@
 | | |
 |---|---|
 | **Product** | COSMO Print & Packaging Accelerator for Microsoft Dynamics 365 Business Central |
-| **Document version** | 0.5 |
+| **Document version** | 0.6 |
 | **Last updated** | 2026-10-30 |
-| **Covers** | Phase 1 – Packaging master data, Phase 2 – Cost calculation, Phase 3 – Quote Wizard, Packaging Worksheet, and Sales Quote |
+| **Covers** | Phase 1 – Packaging master data, Phase 2 – Cost calculation, Phase 3 – Quote Wizard, Packaging Worksheet, and Sales Quote, Phase 4 – Production BOM and routing |
 | **Audience** | Business users, key users, and customer stakeholders |
 
 > This is a living document. A new chapter is added after each implementation phase. Planned features are marked 🔜 and described only briefly until they are available.
@@ -18,7 +18,7 @@
 2. [End-to-end process and feature status](#2-end-to-end-process-and-feature-status)
 3. [Key concepts](#3-key-concepts)
 4. [One-time setup](#4-one-time-setup)
-5. [Worked example: from specification to sales quote](#5-worked-example-from-specification-to-sales-quote)
+5. [Worked example: from specification to production BOM and routing](#5-worked-example-from-specification-to-production-bom-and-routing)
 6. [How the price is calculated](#6-how-the-price-is-calculated)
 7. [Good to know](#7-good-to-know)
 8. [Roles and permissions](#8-roles-and-permissions)
@@ -38,7 +38,7 @@ The goal of the MVP is that a user can, **within a few minutes**:
 2. Calculate its **cost and sales price** for a range of order quantities.
 3. Create a **Sales Quote** from the chosen price.
 4. Turn the accepted quote into a **Sales Order**.
-5. Generate the **Production Order**, including the bill of materials and routing. 🔜
+5. Generate the **Production BOM** and **Routing**, and then the **Production Order**. *(BOM and routing are available; the production order follows in Phase 5.)* 🔜
 
 The accelerator does not replace Business Central processes. Sales, manufacturing, inventory, and finance continue to run on the **standard Business Central documents**. The accelerator adds the packaging-specific steps in front of them.
 
@@ -55,7 +55,7 @@ The accelerator does not replace Business Central processes. Sales, manufacturin
 | 5 | Sales price calculation (price ladder) | Packaging Cost Sheet | ✅ Available (Phase 2) |
 | 6 | Sales Quote | Packaging Quote Wizard (one specification) or Packaging Worksheet (several specifications) → standard Sales Quote | ✅ Available (Phase 3) |
 | 7 | Customer approval → Sales Order | Standard Business Central (*Make Order*) | ✅ Available (Phase 3) |
-| 8 | Production BOM and routing generation | Packaging BOM, routing templates | 🔜 Phase 4 |
+| 8 | Production BOM and routing generation | Packaging BOM, routing templates → standard Production BOM and Routing | ✅ Available (Phase 4) |
 | 9 | Production Order | Action on the Sales Order | 🔜 Phase 5 |
 | 10 | Consumption, output, shipment, invoice | Standard Business Central | Standard |
 
@@ -76,6 +76,8 @@ The accelerator does not replace Business Central processes. Sales, manufacturin
 | **Margin %** | A markup on cost: *Unit Price = Unit Cost × (1 + Margin % / 100)*. Each customer can have a default packaging margin. |
 | **Packaging Quote Wizard** | A guided, four-step page that calculates the price ladder for a customer and a specification and creates a standard Sales Quote from the chosen quantity. |
 | **Packaging Worksheet** | A worksheet, similar to the Requisition Worksheet, where you collect several specifications with quantities, check their prices, and create one Sales Quote per customer in one step. Work is organized in named worksheet batches. |
+| **Packaging BOM** | The components of one piece of the product, calculated from the specification: material, ink, glue, and lamination film. You can review and change it before you generate the standard **Production BOM** from it. |
+| **Routing template** | A list of operations (for example printing, die cutting, folding, gluing, packing) with a work center, setup time, and run time. Each operation has a condition—*Always*, *Only if Die Cut*, *Only if Lamination*, or *Only if Printed*—so one template fits many products. The standard **Routing** is generated from it. |
 
 ---
 
@@ -155,9 +157,45 @@ The quote wizard creates standard sales documents, so the standard sales setup m
 | **Customer card** | The customer has the posting groups needed for sales documents, and is not blocked. |
 | **Item template** (`PACKAGING`) | Sets the base unit of measure and the general product, VAT product, and inventory posting groups (see step 4.3). |
 
+### Step 4.7 – Work centers and routing templates
+
+Production uses standard **work centers**. Create one per production step, for example:
+
+| Work center | Name |
+|---|---|
+| `PP-PRINT` | Printing |
+| `PP-LAMINATE` | Laminating |
+| `PP-DIECUT` | Die cutting |
+| `PP-FOLD` | Folding |
+| `PP-GLUE` | Gluing |
+| `PP-PACK` | Packing |
+
+Then open **Packaging Setup**, choose **Routing Templates**, and create the templates. Times are in the capacity unit of the work center (minutes in the example). Example `BOX_STD`:
+
+| Operation No. | Work Center | Description | Setup Time | Run Time | Condition |
+|---|---|---|---:|---:|---|
+| 10 | `PP-PRINT` | Printing | 30 | 0.02 | Only if Printed |
+| 20 | `PP-LAMINATE` | Laminating | 15 | 0.01 | Only if Lamination |
+| 30 | `PP-DIECUT` | Die cutting | 45 | 0.015 | Only if Die Cut |
+| 40 | `PP-FOLD` | Folding | 10 | 0.01 | Always |
+| 50 | `PP-GLUE` | Gluing | 10 | 0.01 | Always |
+| 60 | `PP-PACK` | Packing | 5 | 0.005 | Always |
+
+`LABEL_STD` and `DIGITAL_STD` are built the same way, with printing, laminating, die cutting, and packing.
+
+Finally, in the **Routing Templates** section of **Packaging Setup**, choose the defaults:
+
+| Field | Example | Used for |
+|---|---|---|
+| Digital Routing Template | `DIGITAL_STD` | Specifications with print process Digital |
+| Box Routing Template | `BOX_STD` | Other specifications with Die Cut |
+| Label Routing Template | `LABEL_STD` | All other specifications |
+
+A specification can override the default in its **Routing Template Code** field. **Generate Demo Data** creates these work centers, templates, and defaults for you.
+
 ---
 
-## 5. Worked example: from specification to sales quote
+## 5. Worked example: from specification to production BOM and routing
 
 **Scenario:** Pizza Kft. asks for a printed, laminated takeaway food box with a custom cutting die.
 
@@ -404,6 +442,46 @@ If the worksheet also contained lines for another customer, that customer would 
 
 When Pizza Kft. accepts the offer, choose **Make Order** on the sales quote (standard Business Central). The sales order line keeps the **Packaging Spec. No.** and **Packaging Cost Sheet No.**, which Phase 5 will use to create the production order.
 
+### Step 5.15 – Prepare production: review the packaging BOM
+
+Before the box can be produced, the finished item `PPI0001` needs a production BOM and a routing. On the specification card `SPEC0001`, choose **Packaging BOM**. The first time, the components are calculated from the specification:
+
+| Item No. | Material Type | Quantity per | Unit of Measure | Scrap % | How it is calculated |
+|---|---|---:|---|---:|---|
+| `MAT-CB-E` | Corrugated | 0.06 | M2 | 10 | Base area 300 × 200 / 1,000,000; waste becomes scrap |
+| `INK-BLACK` | Ink | 0.0012 | L | 10 | 0.06 m² × 0.01 l × 2 colors |
+| `GLUE-01` | Glue | 0.005 | KG | 0 | Glue per piece |
+| `FILM-GLOSS` | Film | 0.06 | M2 | 10 | Base area, because Lamination = Yes |
+
+With the scrap, production consumes 0.066 m² of board per piece—the same required area that the cost sheet used. You can change, add, or delete components here. **Calculate from Specification** recalculates them and replaces your changes.
+
+### Step 5.16 – Generate the production BOM
+
+Choose **Generate Production BOM** (on the packaging BOM or on the specification card). The system:
+
+- creates the standard **Production BOM** `PPI0001` (same number as the finished item) with the four components, unit of measure `PCS`, and status **Certified**;
+- sets **Production BOM No.** `PPI0001` on the item card of `PPI0001`;
+- shows the production BOM number on the packaging BOM.
+
+### Step 5.17 – Generate the routing
+
+`SPEC0001` is printed digitally, so by default the `DIGITAL_STD` template would be used. A box also needs folding and gluing, so set **Routing Template Code** on the specification to `BOX_STD`, and then choose **Generate Routing**. The system includes only the operations whose condition applies—`SPEC0001` is printed, laminated, and die cut, so all six apply:
+
+| Operation No. | Work Center | Description | Setup Time | Run Time |
+|---|---|---|---:|---:|
+| 10 | `PP-PRINT` | Printing | 30 | 0.02 |
+| 20 | `PP-LAMINATE` | Laminating | 15 | 0.01 |
+| 30 | `PP-DIECUT` | Die cutting | 45 | 0.015 |
+| 40 | `PP-FOLD` | Folding | 10 | 0.01 |
+| 50 | `PP-GLUE` | Gluing | 10 | 0.01 |
+| 60 | `PP-PACK` | Packing | 5 | 0.005 |
+
+The standard **Routing** `PPI0001` is created as a serial routing with status **Certified** and set as **Routing No.** on the item. For the insert `SPEC0002` (not laminated, not die cut) the same template would give only printing, folding, gluing, and packing.
+
+Use **Production BOM** and **Routing** on the specification card to open the generated records.
+
+**Generating again** after a change (for example a new waste percentage or a different template) replaces the lines of the existing production BOM or routing and certifies it again. This is blocked if an open production order uses the production BOM or routing; in that case finish or delete the production order first, or create a new version in standard Business Central.
+
 ---
 
 ## 6. How the price is calculated
@@ -444,6 +522,8 @@ On the **sales quote**, the unit price is then converted to the customer's curre
 - **One quote line per wizard run.** Each wizard run creates one sales quote with one line. To quote several specifications or quantities in one quote, use the **Packaging Worksheet**.
 - **Worksheet lines own their cost sheets.** Deleting a worksheet line, or changing its customer or specification, deletes its cost sheet—unless a quote was already created from it.
 - **Worksheet quotes are all-or-nothing.** If one accepted line has a problem (for example, no quantity), no quotes are created and the message tells you which line to fix.
+- **Production BOM and routing belong to the finished item.** They have the same number as the item. Changes you make directly in the standard Production BOM or Routing are replaced the next time you generate them from the specification.
+- **Component units:** packaging BOM quantities are in the base unit of measure of each component item, so board and film should use m², ink liters, and glue kilograms.
 
 ---
 
@@ -451,8 +531,8 @@ On the **sales quote**, the unit price is then converted to the customer's curre
 
 | Permission set | Intended for | Can do |
 |---|---|---|
-| **PP_USER** | Sales and calculation staff | Create and maintain specifications and cost sheets; release specifications (creates the finished item); run the Packaging Quote Wizard; work in the Packaging Worksheet and its batches; read setup and rates. |
-| **PP_POWERUSER** | Key users | Everything in PP_USER, plus maintain Packaging Setup, the Print Cost Matrix, and customer packaging margins. |
+| **PP_USER** | Sales and calculation staff | Create and maintain specifications and cost sheets; release specifications (creates the finished item); run the Packaging Quote Wizard; work in the Packaging Worksheet and its batches; maintain packaging BOMs and generate production BOMs and routings; read setup and rates. |
+| **PP_POWERUSER** | Key users | Everything in PP_USER, plus maintain Packaging Setup, the Print Cost Matrix, routing templates, and customer packaging margins. |
 | **PP_ADMIN** | Administrators | Everything in PP_POWERUSER, plus full item maintenance and **Generate Demo Data**. |
 
 Users also need the standard Business Central permissions for their role, for example for working with items, customers, and sales quotes and orders.
@@ -461,11 +541,7 @@ Users also need the standard Business Central permissions for their role, for ex
 
 ## 9. Coming next
 
-### 9.1 Phase 4 – Production BOM and routing 🔜
-
-From the specification, the system generates a **Production BOM** (board, ink, glue, film) and a **Routing** from templates such as `BOX_STD` (Printing → Die Cutting → Folding → Gluing → Packing), `LABEL_STD`, and `DIGITAL_STD`.
-
-### 9.2 Phase 5 – Production order 🔜
+### 9.1 Phase 5 – Production order 🔜
 
 A **Create Packaging Production** action on the Sales Order generates the BOM and routing, if needed, and creates the **Production Order** as *Firm Planned* or *Released*, depending on the setup.
 
@@ -480,6 +556,8 @@ A **Create Packaging Production** action on the Sales Order generates the BOM an
 | Currency | All rates and cost sheet prices are in local currency (LCY). | Quotes in a foreign currency are converted with the exchange rate of the quote date; the cost sheet itself stays in LCY. |
 | Quote lines | The wizard creates one quote line for one quantity. | Use the Packaging Worksheet to quote several specifications or quantities in one quote. |
 | Glue | The glue quantity per piece in Packaging Setup applies to every specification. | Products without glue, such as inserts and labels, are still charged for glue. |
+| BOM and routing versions | Generating again replaces the lines of the one production BOM and routing per item; versions are not created. | Not possible while an open production order uses them; create versions manually in standard Business Central if you need them. |
+| Routing capacity | Routing templates use work centers only, not machine centers. | Model machines as separate work centers for the MVP. |
 
 ---
 
@@ -487,6 +565,7 @@ A **Create Packaging Production** action on the Sales Order generates the BOM an
 
 | Version | Date | Change |
 |---|---|---|
+| 0.6 | 2026-10-30 | Phase 4: packaging BOM, routing templates with operation conditions, generation of certified Production BOM and Routing; demo data with work centers and templates. |
 | 0.5 | 2026-10-30 | Generate Demo Data action on Packaging Setup for manual testing. |
 | 0.4 | 2026-10-30 | Phase 3: Packaging Worksheet with worksheet batches—quote several specifications at once, one sales quote per customer. |
 | 0.3 | 2026-10-30 | Phase 3: Packaging Quote Wizard, standard Sales Quote with the calculated price, custom quantities, links between quote line, specification, and cost sheet. |

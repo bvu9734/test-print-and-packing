@@ -11,5 +11,9 @@ permissionset 50119 "PP_ADMIN"
     tabledata "No. Series Line" = RIM,
     tabledata "Unit of Measure" = RI,
     tabledata "Item Templ." = RIM,
+    tabledata "Work Center" = RIM,
+    tabledata "Work Center Group" = RI,
+    tabledata "Capacity Unit of Measure" = RI,
+    tabledata "Shop Calendar" = R,
     codeunit "CCO Packaging Demo Data" = X;
 }

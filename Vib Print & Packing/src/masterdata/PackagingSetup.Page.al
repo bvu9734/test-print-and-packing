@@ -65,6 +65,23 @@ page 50115 "CCO Packaging Setup"
           ApplicationArea = All;
         }
       }
+      group(RoutingTemplates)
+      {
+        Caption = 'Routing Templates';
+
+        field("Digital Routing Template"; Rec."Digital Routing Template")
+        {
+          ApplicationArea = All;
+        }
+        field("Box Routing Template"; Rec."Box Routing Template")
+        {
+          ApplicationArea = All;
+        }
+        field("Label Routing Template"; Rec."Label Routing Template")
+        {
+          ApplicationArea = All;
+        }
+      }
     }
   }
 
@@ -103,10 +120,21 @@ page 50115 "CCO Packaging Setup"
         RunObject = page "CCO Print Cost Matrix";
         ToolTip = 'Open the printing, machine setup, and labor rates per print process.', Comment = 'hu-HU=Megnyitja a nyomtatási eljárásonkénti nyomtatási, gépbeállítási és munkaerő-díjakat.';
       }
+      action(RoutingTemplatesAction)
+      {
+        ApplicationArea = All;
+        Caption = 'Routing Templates';
+        Image = Route;
+        RunObject = page "CCO Routing Templates";
+        ToolTip = 'Open the routing templates that routings for packaging specifications are generated from.', Comment = 'hu-HU=Megnyitja a műveleti sablonokat, amelyekből a csomagolási specifikációk műveleti tervei generálódnak.';
+      }
     }
     area(Promoted)
     {
       actionref(PrintCostMatrix_Promoted; PrintCostMatrix)
+      {
+      }
+      actionref(RoutingTemplates_Promoted; RoutingTemplatesAction)
       {
       }
     }

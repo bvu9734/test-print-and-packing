@@ -15,6 +15,8 @@ codeunit 50205 "CCO Packaging Demo Data Tests"
     PackagingWkshLine: Record "CCO Packaging Wksh. Line";
     PrintCostMatrix: Record "CCO Print Cost Matrix";
     PackagingSetup: Record "CCO Packaging Setup";
+    WorkCenter: Record "Work Center";
+    RoutingTemplateLine: Record "CCO Routing Template Line";
     MaterialTypeOrdinal: Integer;
     MaterialType: Enum "CCO Material Type";
   begin
@@ -46,6 +48,12 @@ codeunit 50205 "CCO Packaging Demo Data Tests"
     Assert.RecordCount(PackagingWkshLine, 4);
     PackagingWkshLine.SetRange("Unit Price (LCY)", 0);
     Assert.RecordIsEmpty(PackagingWkshLine);
+
+    // [THEN] Work centers and routing templates for production are available
+    Assert.IsTrue(WorkCenter.Get('PP-PRINT'), 'The printing work center must exist.');
+    RoutingTemplateLine.SetRange("Template Code", 'BOX_STD');
+    Assert.RecordCount(RoutingTemplateLine, 6);
+    PackagingSetup.TestField("Box Routing Template");
   end;
 
   [Test]

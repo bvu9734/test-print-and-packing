@@ -84,6 +84,27 @@ table 50106 "CCO Packaging Setup"
       DecimalPlaces = 0 : 5;
       MinValue = 0;
     }
+    field(20; "Digital Routing Template"; Code[20])
+    {
+      Caption = 'Digital Routing Template';
+      ToolTip = 'Specifies the default routing template for specifications with the Digital print process.', Comment = 'hu-HU=Megadja a digitális nyomtatási eljárású specifikációk alapértelmezett műveleti sablonját.';
+      DataClassification = CustomerContent;
+      TableRelation = "CCO Routing Template";
+    }
+    field(21; "Box Routing Template"; Code[20])
+    {
+      Caption = 'Box Routing Template';
+      ToolTip = 'Specifies the default routing template for die-cut specifications that are not digitally printed.', Comment = 'hu-HU=Megadja a nem digitálisan nyomtatott, stancolt specifikációk alapértelmezett műveleti sablonját.';
+      DataClassification = CustomerContent;
+      TableRelation = "CCO Routing Template";
+    }
+    field(22; "Label Routing Template"; Code[20])
+    {
+      Caption = 'Label Routing Template';
+      ToolTip = 'Specifies the default routing template for all other specifications.', Comment = 'hu-HU=Megadja az összes többi specifikáció alapértelmezett műveleti sablonját.';
+      DataClassification = CustomerContent;
+      TableRelation = "CCO Routing Template";
+    }
   }
 
   keys

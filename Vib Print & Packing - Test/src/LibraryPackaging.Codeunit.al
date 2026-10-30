@@ -4,6 +4,7 @@ codeunit 50203 "CCO Library - Packaging"
   /// Sets up the consumption settings and the Digital print rates used by the tests:
   /// ink 0.01 per m² per color at unit cost 20, glue 0.005 per piece at unit cost 4,
   /// film at 1 per m² plus 0.03 per piece, and Digital printing 0.02, setup 100, labor 0.05.
+  /// Ensures that Packaging Setup exists and has number series for specifications, cost sheets, and items.
   /// </summary>
   procedure InitializeRates()
   var
@@ -13,6 +14,12 @@ codeunit 50203 "CCO Library - Packaging"
       PackagingSetup.Init();
       PackagingSetup.Insert(false);
     end;
+    if PackagingSetup."Packaging Spec. Nos." = '' then
+      PackagingSetup."Packaging Spec. Nos." := CreateNoSeries('PPTSPEC00001');
+    if PackagingSetup."Cost Sheet Nos." = '' then
+      PackagingSetup."Cost Sheet Nos." := CreateNoSeries('PPTCS00001');
+    if PackagingSetup."Item Nos." = '' then
+      PackagingSetup."Item Nos." := CreateNoSeries('PPTITEM00001');
     PackagingSetup."Ink Item No." := CreateMaterialItem(0, 20);
     PackagingSetup."Ink Qty. per m² per Color" := 0.01;
     PackagingSetup."Glue Item No." := CreateMaterialItem(0, 4);
@@ -62,18 +69,18 @@ codeunit 50203 "CCO Library - Packaging"
   end;
 
   /// <summary>
-  /// Creates a minimal packaging material item with a cost per m² and a unit cost.
+  /// Creates a packaging material item, with a base unit of measure and posting groups, with a cost per m² and a unit cost.
   /// </summary>
   procedure CreateMaterialItem(CostPerSquareMeter: Decimal; UnitCost: Decimal) ItemNo: Code[20]
   var
     Item: Record Item;
+    LibraryInventory: Codeunit "Library - Inventory";
   begin
-    Item.Init();
-    Item."No." := NewCode();
+    LibraryInventory.CreateItem(Item);
     Item."CCO Packaging Material Type" := Item."CCO Packaging Material Type"::Paper;
     Item."CCO Cost per m²" := CostPerSquareMeter;
     Item."Unit Cost" := UnitCost;
-    Item.Insert(false);
+    Item.Modify(false);
     ItemNo := Item."No.";
   end;
 
@@ -95,6 +102,14 @@ codeunit 50203 "CCO Library - Packaging"
   /// Creates an open number series with manual and default numbers.
   /// </summary>
   procedure CreateNoSeries() NoSeriesCode: Code[20]
+  begin
+    NoSeriesCode := CreateNoSeries('PPTEST00001');
+  end;
+
+  /// <summary>
+  /// Creates an open number series with manual and default numbers that starts with the given number.
+  /// </summary>
+  procedure CreateNoSeries(StartingNo: Code[20]) NoSeriesCode: Code[20]
   var
     NoSeries: Record "No. Series";
     NoSeriesLine: Record "No. Series Line";
@@ -108,7 +123,7 @@ codeunit 50203 "CCO Library - Packaging"
     NoSeriesLine.Init();
     NoSeriesLine."Series Code" := NoSeries.Code;
     NoSeriesLine."Line No." := 10000;
-    NoSeriesLine."Starting No." := 'PPTEST00001';
+    NoSeriesLine."Starting No." := StartingNo;
     NoSeriesLine.Open := true;
     NoSeriesLine.Insert(false);
     NoSeriesCode := NoSeries.Code;
@@ -180,5 +195,42 @@ codeunit 50203 "CCO Library - Packaging"
     PackagingWkshName.Name := CopyStr(NewCode(), 1, MaxStrLen(PackagingWkshName.Name));
     PackagingWkshName.Insert(true);
     WorksheetName := PackagingWkshName.Name;
+  end;
+
+  /// <summary>
+  /// Creates a routing template with four operations on new work centers:
+  /// 10 printing (only if printed), 20 laminating (only if laminated), 30 die cutting (only if die cut), and 40 packing (always).
+  /// </summary>
+  procedure CreateRoutingTemplate() TemplateCode: Code[20]
+  var
+    RoutingTemplate: Record "CCO Routing Template";
+  begin
+    RoutingTemplate.Init();
+    RoutingTemplate."Code" := NewCode();
+    RoutingTemplate.Description := 'Test routing template';
+    RoutingTemplate.Insert(true);
+    TemplateCode := RoutingTemplate."Code";
+
+    AddTemplateOperation(TemplateCode, '10', 30, 0.02, "CCO Operation Condition"::Printing);
+    AddTemplateOperation(TemplateCode, '20', 15, 0.01, "CCO Operation Condition"::Lamination);
+    AddTemplateOperation(TemplateCode, '30', 45, 0.015, "CCO Operation Condition"::"Die Cut");
+    AddTemplateOperation(TemplateCode, '40', 5, 0.005, "CCO Operation Condition"::Always);
+  end;
+
+  local procedure AddTemplateOperation(TemplateCode: Code[20]; OperationNo: Code[10]; SetupTime: Decimal; RunTime: Decimal; Condition: Enum "CCO Operation Condition")
+  var
+    RoutingTemplateLine: Record "CCO Routing Template Line";
+    WorkCenter: Record "Work Center";
+    LibraryManufacturing: Codeunit "Library - Manufacturing";
+  begin
+    LibraryManufacturing.CreateWorkCenter(WorkCenter);
+    RoutingTemplateLine.Init();
+    RoutingTemplateLine."Template Code" := TemplateCode;
+    RoutingTemplateLine."Operation No." := OperationNo;
+    RoutingTemplateLine.Validate("Work Center No.", WorkCenter."No.");
+    RoutingTemplateLine."Setup Time" := SetupTime;
+    RoutingTemplateLine."Run Time" := RunTime;
+    RoutingTemplateLine.Condition := Condition;
+    RoutingTemplateLine.Insert(true);
   end;
 }

@@ -30,11 +30,23 @@ codeunit 50139 "CCO Packaging Demo Data"
     SummaryLineTxt: Label '%1: %2 created, %3 already existed.', Comment = '%1 = Area, %2 = Number of created records, %3 = Number of existing records';
     NoPostingGroupsTxt: Label 'No item with posting groups was found. The demo items have no posting groups, so they cannot be posted or quoted until you add them.';
     NoCustomerPostingSetupTxt: Label 'No customer with posting groups was found. The demo customers have no posting groups, so quotes may fail until you add them.';
+    NoShopCalendarTxt: Label 'No shop calendar was found. The demo work centers have no shop calendar; add one before you schedule production orders.';
+    BoxTemplateTok: Label 'BOX_STD', Locked = true;
+    LabelTemplateTok: Label 'LABEL_STD', Locked = true;
+    DigitalTemplateTok: Label 'DIGITAL_STD', Locked = true;
+    PrintWorkCenterTok: Label 'PP-PRINT', Locked = true;
+    LaminateWorkCenterTok: Label 'PP-LAMINATE', Locked = true;
+    DieCutWorkCenterTok: Label 'PP-DIECUT', Locked = true;
+    FoldWorkCenterTok: Label 'PP-FOLD', Locked = true;
+    GlueWorkCenterTok: Label 'PP-GLUE', Locked = true;
+    PackWorkCenterTok: Label 'PP-PACK', Locked = true;
+    WorkCenterGroupTok: Label 'PP', Locked = true;
+    CapacityUnitTok: Label 'PP-MIN', Locked = true;
 
   /// <summary>
   /// Creates the master data needed to test the packaging feature manually: number series, Packaging Setup,
-  /// Print Cost Matrix, an item template, one material item per material type with random values, demo customers,
-  /// sample specifications, and a worksheet batch with lines. Existing demo records are kept.
+  /// Print Cost Matrix, an item template, one material item per material type with random values, work centers,
+  /// routing templates, demo customers, sample specifications, and a worksheet batch with lines. Existing demo records are kept.
   /// </summary>
   /// <returns>A summary of the created and existing records.</returns>
   procedure Generate() GenerationSummary: Text
@@ -47,6 +59,8 @@ codeunit 50139 "CCO Packaging Demo Data"
     CreateUnitsOfMeasure();
     CreateItemTemplate();
     CreateMaterialItems();
+    CreateWorkCenters();
+    CreateRoutingTemplates();
     UpdatePackagingSetup();
     CreatePrintCostMatrix();
     CreateCustomers();
@@ -54,6 +68,155 @@ codeunit 50139 "CCO Packaging Demo Data"
     CreateWorksheet();
 
     GenerationSummary := Summary.ToText();
+  end;
+
+  local procedure CreateWorkCenters()
+  var
+    ReferenceWorkCenter: Record "Work Center";
+    ShopCalendar: Record "Shop Calendar";
+    WorkCenterGroupCode: Code[10];
+    CapacityUnitCode: Code[10];
+    ShopCalendarCode: Code[10];
+    Created: Integer;
+    Existing: Integer;
+  begin
+    ReferenceWorkCenter.SetFilter("Work Center Group Code", '<>%1', '');
+    ReferenceWorkCenter.SetFilter("Unit of Measure Code", '<>%1', '');
+    if ReferenceWorkCenter.FindFirst() then begin
+      WorkCenterGroupCode := ReferenceWorkCenter."Work Center Group Code";
+      CapacityUnitCode := ReferenceWorkCenter."Unit of Measure Code";
+      ShopCalendarCode := ReferenceWorkCenter."Shop Calendar Code";
+    end else begin
+      WorkCenterGroupCode := CreateWorkCenterGroup();
+      CapacityUnitCode := CreateCapacityUnitOfMeasure();
+    end;
+    if (ShopCalendarCode = '') and ShopCalendar.FindFirst() then
+      ShopCalendarCode := ShopCalendar.Code;
+    if ShopCalendarCode = '' then
+      Summary.AppendLine(NoShopCalendarTxt);
+
+    CountResult(CreateWorkCenter(PrintWorkCenterTok, 'Printing (demo)', WorkCenterGroupCode, CapacityUnitCode, ShopCalendarCode), Created, Existing);
+    CountResult(CreateWorkCenter(LaminateWorkCenterTok, 'Laminating (demo)', WorkCenterGroupCode, CapacityUnitCode, ShopCalendarCode), Created, Existing);
+    CountResult(CreateWorkCenter(DieCutWorkCenterTok, 'Die cutting (demo)', WorkCenterGroupCode, CapacityUnitCode, ShopCalendarCode), Created, Existing);
+    CountResult(CreateWorkCenter(FoldWorkCenterTok, 'Folding (demo)', WorkCenterGroupCode, CapacityUnitCode, ShopCalendarCode), Created, Existing);
+    CountResult(CreateWorkCenter(GlueWorkCenterTok, 'Gluing (demo)', WorkCenterGroupCode, CapacityUnitCode, ShopCalendarCode), Created, Existing);
+    CountResult(CreateWorkCenter(PackWorkCenterTok, 'Packing (demo)', WorkCenterGroupCode, CapacityUnitCode, ShopCalendarCode), Created, Existing);
+    AddSummaryLine('Work centers', Created, Existing);
+  end;
+
+  local procedure CreateWorkCenterGroup() WorkCenterGroupCode: Code[10]
+  var
+    WorkCenterGroup: Record "Work Center Group";
+  begin
+    WorkCenterGroupCode := WorkCenterGroupTok;
+    if WorkCenterGroup.Get(WorkCenterGroupCode) then
+      exit;
+    WorkCenterGroup.Init();
+    WorkCenterGroup.Code := WorkCenterGroupCode;
+    WorkCenterGroup.Name := 'Packaging (demo)';
+    WorkCenterGroup.Insert(true);
+  end;
+
+  local procedure CreateCapacityUnitOfMeasure() CapacityUnitCode: Code[10]
+  var
+    CapacityUnitOfMeasure: Record "Capacity Unit of Measure";
+  begin
+    CapacityUnitCode := CapacityUnitTok;
+    if CapacityUnitOfMeasure.Get(CapacityUnitCode) then
+      exit;
+    CapacityUnitOfMeasure.Init();
+    CapacityUnitOfMeasure.Code := CapacityUnitCode;
+    CapacityUnitOfMeasure.Description := 'Minutes (demo)';
+    CapacityUnitOfMeasure.Type := CapacityUnitOfMeasure.Type::Minutes;
+    CapacityUnitOfMeasure.Insert(true);
+  end;
+
+  local procedure CreateWorkCenter(WorkCenterNo: Code[20]; WorkCenterName: Text[100]; WorkCenterGroupCode: Code[10]; CapacityUnitCode: Code[10]; ShopCalendarCode: Code[10]) Created: Boolean
+  var
+    WorkCenter: Record "Work Center";
+  begin
+    if WorkCenter.Get(WorkCenterNo) then
+      exit;
+
+    WorkCenter.Init();
+    WorkCenter."No." := WorkCenterNo;
+    WorkCenter.Insert(true);
+    WorkCenter.Validate(Name, WorkCenterName);
+    WorkCenter.Validate("Work Center Group Code", WorkCenterGroupCode);
+    WorkCenter.Validate("Unit of Measure Code", CapacityUnitCode);
+    if ShopCalendarCode <> '' then
+      WorkCenter.Validate("Shop Calendar Code", ShopCalendarCode);
+    if ReferenceGenProdPostingGroup <> '' then
+      WorkCenter.Validate("Gen. Prod. Posting Group", ReferenceGenProdPostingGroup);
+    WorkCenter.Validate(Capacity, 1);
+    WorkCenter.Validate(Efficiency, 100);
+    WorkCenter.Validate("Direct Unit Cost", RandomDecimal(0.3, 1.5, 0.05));
+    WorkCenter.Modify(true);
+    Created := true;
+  end;
+
+  local procedure CreateRoutingTemplates()
+  var
+    Created: Integer;
+    Existing: Integer;
+  begin
+    if CreateRoutingTemplate(BoxTemplateTok, 'Standard box: print, laminate, die cut, fold, glue, pack') then begin
+      AddTemplateOperation(BoxTemplateTok, '10', PrintWorkCenterTok, 30, 0.02, "CCO Operation Condition"::Printing);
+      AddTemplateOperation(BoxTemplateTok, '20', LaminateWorkCenterTok, 15, 0.01, "CCO Operation Condition"::Lamination);
+      AddTemplateOperation(BoxTemplateTok, '30', DieCutWorkCenterTok, 45, 0.015, "CCO Operation Condition"::"Die Cut");
+      AddTemplateOperation(BoxTemplateTok, '40', FoldWorkCenterTok, 10, 0.01, "CCO Operation Condition"::Always);
+      AddTemplateOperation(BoxTemplateTok, '50', GlueWorkCenterTok, 10, 0.01, "CCO Operation Condition"::Always);
+      AddTemplateOperation(BoxTemplateTok, '60', PackWorkCenterTok, 5, 0.005, "CCO Operation Condition"::Always);
+      Created += 1;
+    end else
+      Existing += 1;
+
+    if CreateRoutingTemplate(LabelTemplateTok, 'Standard label: print, laminate, die cut, pack') then begin
+      AddTemplateOperation(LabelTemplateTok, '10', PrintWorkCenterTok, 30, 0.01, "CCO Operation Condition"::Printing);
+      AddTemplateOperation(LabelTemplateTok, '20', LaminateWorkCenterTok, 15, 0.005, "CCO Operation Condition"::Lamination);
+      AddTemplateOperation(LabelTemplateTok, '30', DieCutWorkCenterTok, 30, 0.005, "CCO Operation Condition"::"Die Cut");
+      AddTemplateOperation(LabelTemplateTok, '40', PackWorkCenterTok, 5, 0.002, "CCO Operation Condition"::Always);
+      Created += 1;
+    end else
+      Existing += 1;
+
+    if CreateRoutingTemplate(DigitalTemplateTok, 'Digital print: print, laminate, die cut, pack') then begin
+      AddTemplateOperation(DigitalTemplateTok, '10', PrintWorkCenterTok, 10, 0.03, "CCO Operation Condition"::Printing);
+      AddTemplateOperation(DigitalTemplateTok, '20', LaminateWorkCenterTok, 15, 0.01, "CCO Operation Condition"::Lamination);
+      AddTemplateOperation(DigitalTemplateTok, '30', DieCutWorkCenterTok, 30, 0.015, "CCO Operation Condition"::"Die Cut");
+      AddTemplateOperation(DigitalTemplateTok, '40', PackWorkCenterTok, 5, 0.005, "CCO Operation Condition"::Always);
+      Created += 1;
+    end else
+      Existing += 1;
+
+    AddSummaryLine('Routing templates', Created, Existing);
+  end;
+
+  local procedure CreateRoutingTemplate(TemplateCode: Code[20]; TemplateDescription: Text[100]) Created: Boolean
+  var
+    RoutingTemplate: Record "CCO Routing Template";
+  begin
+    if RoutingTemplate.Get(TemplateCode) then
+      exit;
+    RoutingTemplate.Init();
+    RoutingTemplate."Code" := TemplateCode;
+    RoutingTemplate.Description := TemplateDescription;
+    RoutingTemplate.Insert(true);
+    Created := true;
+  end;
+
+  local procedure AddTemplateOperation(TemplateCode: Code[20]; OperationNo: Code[10]; WorkCenterNo: Code[20]; SetupTime: Decimal; RunTime: Decimal; Condition: Enum "CCO Operation Condition")
+  var
+    RoutingTemplateLine: Record "CCO Routing Template Line";
+  begin
+    RoutingTemplateLine.Init();
+    RoutingTemplateLine."Template Code" := TemplateCode;
+    RoutingTemplateLine."Operation No." := OperationNo;
+    RoutingTemplateLine.Validate("Work Center No.", WorkCenterNo);
+    RoutingTemplateLine."Setup Time" := SetupTime;
+    RoutingTemplateLine."Run Time" := RunTime;
+    RoutingTemplateLine.Condition := Condition;
+    RoutingTemplateLine.Insert(true);
   end;
 
   local procedure CreateNumberSeries()
@@ -214,11 +377,14 @@ codeunit 50139 "CCO Packaging Demo Data"
     SetIfBlank(PackagingSetup."Ink Item No.", InkItemTok, Updated);
     SetIfBlank(PackagingSetup."Glue Item No.", GlueItemTok, Updated);
     SetIfBlank(PackagingSetup."Lamination Film Item No.", FilmItemTok, Updated);
+    SetIfBlank(PackagingSetup."Digital Routing Template", DigitalTemplateTok, Updated);
+    SetIfBlank(PackagingSetup."Box Routing Template", BoxTemplateTok, Updated);
+    SetIfBlank(PackagingSetup."Label Routing Template", LabelTemplateTok, Updated);
     SetIfZero(PackagingSetup."Ink Qty. per m² per Color", RandomDecimal(0.005, 0.015, 0.001), Updated);
     SetIfZero(PackagingSetup."Glue Qty. per Piece", RandomDecimal(0.002, 0.008, 0.001), Updated);
     SetIfZero(PackagingSetup."Lamination Cost per Piece", RandomDecimal(0.01, 0.05, 0.005), Updated);
     PackagingSetup.Modify(true);
-    AddSummaryLine('Packaging Setup fields', Updated, 10 - Updated);
+    AddSummaryLine('Packaging Setup fields', Updated, 13 - Updated);
   end;
 
   local procedure CreatePrintCostMatrix()
