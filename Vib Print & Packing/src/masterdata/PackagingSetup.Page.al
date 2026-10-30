@@ -17,7 +17,6 @@ page 50115 "CCO Packaging Setup"
         field("Packaging Spec. Nos."; Rec."Packaging Spec. Nos.")
         {
           ApplicationArea = All;
-          ToolTip = 'Specifies the number series used to assign codes to packaging specifications.';
         }
       }
     }

@@ -14,6 +14,9 @@
   "screenshots": [],
   "platform": "1.0.0.0",
   "application": "29.0.0.0",
+  "supportedLocales": [
+    "hu-HU"
+  ],
   "idRanges": [
     {
       "from": 50100,
