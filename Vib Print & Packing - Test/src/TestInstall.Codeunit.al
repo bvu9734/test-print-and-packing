@@ -4,7 +4,8 @@ codeunit 50299 "CCO Test Install"
 
   var
     TestSuiteNameTok: Label 'PRINTPACK', Locked = true, MaxLength = 10;
-    TestCodeunitRangeTok: Label '50200..50250', Locked = true;
+    // Codeunit 50205 "CCO Packaging Demo Data Tests" is skipped: it changes the company's demo master data.
+    TestCodeunitRangeTok: Label '50200..50204|50206..50250', Locked = true;
 
   trigger OnInstallAppPerCompany()
   begin

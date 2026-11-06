@@ -99,12 +99,11 @@ codeunit 50152 "CCO Packaging Production Mgt."
 
   /// <summary>
   /// Blocks a quantity change on a sales order line with a packaging specification that has an open production order,
-  /// when Qty. Change after Prod. Order in Packaging Setup is Error. Runs before the quantity is validated, so the change is
-  /// blocked before the standard Business Central checks of the production order ask the user.
+  /// when Qty. Change after Prod. Order in Packaging Setup is Error. Runs during the quantity validation, just before the standard
+  /// Business Central check of the production order status, so the change is blocked before the standard confirmation dialog.
   /// </summary>
-  /// <param name="SalesLine">The sales line with the new quantity.</param>
-  /// <param name="xSalesLine">The sales line before the change.</param>
-  procedure CheckQuantityChangeBlocked(SalesLine: Record "Sales Line"; xSalesLine: Record "Sales Line")
+  /// <param name="SalesLine">The sales line with the new quantity. It is compared with the stored line.</param>
+  procedure CheckQuantityChangeBlocked(SalesLine: Record "Sales Line")
   var
     PackagingSetup: Record "CCO Packaging Setup";
     ProductionOrder: Record "Production Order";
@@ -112,10 +111,9 @@ codeunit 50152 "CCO Packaging Production Mgt."
   begin
     if not IsQuantityCheckRelevant(SalesLine) then
       exit;
-    // xRec is not reliable for all callers, so the new quantity is also compared with the stored line.
-    if StoredSalesLine.Get(SalesLine."Document Type", SalesLine."Document No.", SalesLine."Line No.") then
-      xSalesLine.Quantity := StoredSalesLine.Quantity;
-    if SalesLine.Quantity = xSalesLine.Quantity then
+    if not StoredSalesLine.Get(SalesLine."Document Type", SalesLine."Document No.", SalesLine."Line No.") then
+      exit;
+    if SalesLine."Quantity (Base)" = StoredSalesLine."Quantity (Base)" then
       exit;
     if not PackagingSetup.Get() then
       exit;
