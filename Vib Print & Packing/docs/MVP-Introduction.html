@@ -61,15 +61,15 @@
 </tr>
 <tr>
 <td><strong>Document version</strong></td>
-<td>0.6</td>
+<td>0.7</td>
 </tr>
 <tr>
 <td><strong>Last updated</strong></td>
-<td>2026-10-30</td>
+<td>2026-11-06</td>
 </tr>
 <tr>
 <td><strong>Covers</strong></td>
-<td>Phase 1 – Packaging master data, Phase 2 – Cost calculation, Phase 3 – Quote Wizard, Packaging Worksheet, and Sales Quote, Phase 4 – Production BOM and routing</td>
+<td>Phase 1 – Packaging master data, Phase 2 – Cost calculation, Phase 3 – Quote Wizard, Packaging Worksheet, and Sales Quote, Phase 4 – Production BOM and routing, Phase 5 – Production order</td>
 </tr>
 <tr>
 <td><strong>Audience</strong></td>
@@ -87,7 +87,7 @@
 <li><a href="#2-end-to-end-process-and-feature-status">End-to-end process and feature status</a></li>
 <li><a href="#3-key-concepts">Key concepts</a></li>
 <li><a href="#4-one-time-setup">One-time setup</a></li>
-<li><a href="#5-worked-example-from-specification-to-production-bom-and-routing">Worked example: from specification to production BOM and routing</a></li>
+<li><a href="#5-worked-example-from-specification-to-production-order">Worked example: from specification to production order</a></li>
 <li><a href="#6-how-the-price-is-calculated">How the price is calculated</a></li>
 <li><a href="#7-good-to-know">Good to know</a></li>
 <li><a href="#8-roles-and-permissions">Roles and permissions</a></li>
@@ -104,7 +104,7 @@
 <li>Calculate its <strong>cost and sales price</strong> for a range of order quantities.</li>
 <li>Create a <strong>Sales Quote</strong> from the chosen price.</li>
 <li>Turn the accepted quote into a <strong>Sales Order</strong>.</li>
-<li>Generate the <strong>Production BOM</strong> and <strong>Routing</strong>, and then the <strong>Production Order</strong>. <em>(BOM and routing are available; the production order follows in Phase 5.)</em> 🔜</li>
+<li>Generate the <strong>Production BOM</strong> and <strong>Routing</strong>, and then the <strong>Production Order</strong> from the sales order line.</li>
 </ol>
 <p>The accelerator does not replace Business Central processes. Sales, manufacturing, inventory, and finance continue to run on the <strong>standard Business Central documents</strong>. The accelerator adds the packaging-specific steps in front of them.</p>
 <hr>
@@ -170,8 +170,8 @@
 <tr>
 <td>9</td>
 <td>Production Order</td>
-<td>Action on the Sales Order</td>
-<td>🔜 Phase 5</td>
+<td><strong>Create Packaging Production</strong> on the sales order line → standard Firm Planned or Released Production Order</td>
+<td>✅ Available (Phase 5)</td>
 </tr>
 <tr>
 <td>10</td>
@@ -588,8 +588,38 @@
 </tbody>
 </table>
 <p>A specification can override the default in its <strong>Routing Template Code</strong> field. <strong>Generate Demo Data</strong> creates these work centers, templates, and defaults for you.</p>
+<p>Production orders are scheduled on the work center calendars, so each work center needs a <strong>shop calendar</strong>, and you must run <strong>Calculate Work Center Calendar</strong> for the period you plan in.</p>
+<h3 id="step-48-production-order-settings">Step 4.8 – Production order settings</h3>
+<p>In the <strong>Production</strong> section of <strong>Packaging Setup</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Options</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Prod. Order Status</td>
+<td><strong>Firm Planned</strong> (default), Released</td>
+<td>The status of the production orders that <strong>Create Packaging Production</strong> creates.</td>
+</tr>
+<tr>
+<td>BOM/Routing Generation</td>
+<td><strong>Only if Missing</strong> (default), Always Regenerate</td>
+<td><em>Only if Missing</em> generates the production BOM and routing only when the finished item has none. <em>Always Regenerate</em> generates them again every time—the production BOM from the current packaging BOM and the routing from the routing template—so the production order always uses the latest packaging BOM and template.</td>
+</tr>
+<tr>
+<td>Qty. Change after Prod. Order</td>
+<td><strong>Warning</strong> (default), Error</td>
+<td>What happens when someone changes the quantity on a sales order line that already has an open production order. <em>Warning</em> allows the change and shows a notification; <em>Error</em> blocks the change.</td>
+</tr>
+</tbody>
+</table>
+<p>In standard <strong>Manufacturing Setup</strong>, <strong>Firm Planned Order Nos.</strong> and <strong>Released Order Nos.</strong> must be filled in. <strong>Generate Demo Data</strong> warns you if they are missing.</p>
 <hr>
-<h2 id="5-worked-example-from-specification-to-production-bom-and-routing">5. Worked example: from specification to production BOM and routing</h2>
+<h2 id="5-worked-example-from-specification-to-production-order">5. Worked example: from specification to production order</h2>
 <p><strong>Scenario:</strong> Pizza Kft. asks for a printed, laminated takeaway food box with a custom cutting die.</p>
 <h3 id="step-51-create-the-packaging-specification">Step 5.1 – Create the packaging specification</h3>
 <p>Open <strong>Packaging Specifications</strong>, choose <strong>New</strong>, and fill in the card:</p>
@@ -1256,7 +1286,7 @@
 </table>
 <p>If the worksheet also contained lines for another customer, that customer would get a separate quote in the same run. The cost sheets <code>CS0003</code> and <code>CS0004</code> are kept and show the quote number. Prices on the quote follow the same rounding and currency rules as described in step 5.12.</p>
 <h3 id="step-514-customer-approval-make-the-sales-order">Step 5.14 – Customer approval: make the sales order</h3>
-<p>When Pizza Kft. accepts the offer, choose <strong>Make Order</strong> on the sales quote (standard Business Central). The sales order line keeps the <strong>Packaging Spec. No.</strong> and <strong>Packaging Cost Sheet No.</strong>, which Phase 5 will use to create the production order.</p>
+<p>When Pizza Kft. accepts the offer, choose <strong>Make Order</strong> on the sales quote (standard Business Central). The sales order line keeps the <strong>Packaging Spec. No.</strong> and <strong>Packaging Cost Sheet No.</strong>, which <strong>Create Packaging Production</strong> uses in step 5.18.</p>
 <h3 id="step-515-prepare-production-review-the-packaging-bom">Step 5.15 – Prepare production: review the packaging BOM</h3>
 <p>Before the box can be produced, the finished item <code>PPI0001</code> needs a production BOM and a routing. On the specification card <code>SPEC0001</code>, choose <strong>Packaging BOM</strong>. The first time, the components are calculated from the specification:</p>
 <table>
@@ -1373,6 +1403,124 @@
 <p>The standard <strong>Routing</strong> <code>PPI0001</code> is created as a serial routing with status <strong>Certified</strong> and set as <strong>Routing No.</strong> on the item. For the insert <code>SPEC0002</code> (not laminated, not die cut) the same template would give only printing, folding, gluing, and packing.</p>
 <p>Use <strong>Production BOM</strong> and <strong>Routing</strong> on the specification card to open the generated records.</p>
 <p><strong>Generating again</strong> after a change (for example a new waste percentage or a different template) replaces the lines of the existing production BOM or routing and certifies it again. This is blocked if an open production order uses the production BOM or routing; in that case finish or delete the production order first, or create a new version in standard Business Central.</p>
+<h3 id="step-518-create-the-production-order-from-the-sales-order">Step 5.18 – Create the production order from the sales order</h3>
+<p>Open the sales order of Pizza Kft. from step 5.14. Select the line for <code>PPI0001</code> (1,000 pieces, shipment date 20 November) and choose <strong>Line → Create Packaging Production</strong>.</p>
+<p>The system checks the line and then:</p>
+<ol>
+<li>Generates the production BOM and routing if the item has none (setup <em>Only if Missing</em>). They already exist from steps 5.16 and 5.17, so they are reused.</li>
+<li>Creates a standard production order with the status from Packaging Setup—here <strong>Firm Planned</strong>—for item <code>PPI0001</code>, quantity 1,000, and due date 20 November. Business Central calculates the components, the routing, and the schedule, and reserves the order for the sales line (the item is <em>Make-to-Order</em>).</li>
+<li>Stores the sales order, line, specification, and cost sheet on the production order.</li>
+<li>Shows a message and offers to open the production order.</li>
+</ol>
+<p>The production order components for 1,000 pieces (quantity per × 1,000, plus scrap):</p>
+<table>
+<thead>
+<tr>
+<th>Item No.</th>
+<th style="text-align: right;">Quantity per</th>
+<th style="text-align: right;">Scrap %</th>
+<th style="text-align: right;">Expected quantity</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>MAT-CB-E</code></td>
+<td style="text-align: right;">0.06</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">66 m²</td>
+</tr>
+<tr>
+<td><code>INK-BLACK</code></td>
+<td style="text-align: right;">0.0012</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">1.32 l</td>
+</tr>
+<tr>
+<td><code>GLUE-01</code></td>
+<td style="text-align: right;">0.005</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">5 kg</td>
+</tr>
+<tr>
+<td><code>FILM-GLOSS</code></td>
+<td style="text-align: right;">0.06</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">66 m²</td>
+</tr>
+</tbody>
+</table>
+<p>The production order routing (setup time + run time × 1,000, in minutes):</p>
+<table>
+<thead>
+<tr>
+<th>Operation No.</th>
+<th>Work Center</th>
+<th style="text-align: right;">Setup Time</th>
+<th style="text-align: right;">Run Time</th>
+<th style="text-align: right;">Total</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>10</td>
+<td><code>PP-PRINT</code></td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">0.02</td>
+<td style="text-align: right;">50</td>
+</tr>
+<tr>
+<td>20</td>
+<td><code>PP-LAMINATE</code></td>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">0.01</td>
+<td style="text-align: right;">25</td>
+</tr>
+<tr>
+<td>30</td>
+<td><code>PP-DIECUT</code></td>
+<td style="text-align: right;">45</td>
+<td style="text-align: right;">0.015</td>
+<td style="text-align: right;">60</td>
+</tr>
+<tr>
+<td>40</td>
+<td><code>PP-FOLD</code></td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">0.01</td>
+<td style="text-align: right;">20</td>
+</tr>
+<tr>
+<td>50</td>
+<td><code>PP-GLUE</code></td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">0.01</td>
+<td style="text-align: right;">20</td>
+</tr>
+<tr>
+<td>60</td>
+<td><code>PP-PACK</code></td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0.005</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"></td>
+<td style="text-align: right;"><strong>185</strong></td>
+</tr>
+</tbody>
+</table>
+<p>The sales order line now shows the <strong>Prod. Order No.</strong>; drill down on it to open the production order. On the production order, the <strong>Sales Order No.</strong>, <strong>Sales Order Line No.</strong>, <strong>Packaging Spec. No.</strong>, and <strong>Packaging Cost Sheet No.</strong> show where it came from. On the specification card, <strong>Production Orders</strong> lists all orders for the specification.</p>
+<p><strong>Running the action again</strong> on the same line doesn't create a second order. The message tells you which open production order already exists for the line.</p>
+<h3 id="step-519-the-customer-changes-the-quantity">Step 5.19 – The customer changes the quantity</h3>
+<p>Pizza Kft. now wants 1,200 boxes. When you change the quantity on the sales order line from 1,000 to 1,200:</p>
+<ul>
+<li>With <strong>Qty. Change after Prod. Order</strong> = <em>Warning</em>, the change is saved and a notification says that firm planned production order for 1,000 pieces exists for the line. Choose <strong>Open Production Order</strong> in the notification and update its quantity, then refresh it. If <strong>Planning Warning</strong> is turned on in Manufacturing Setup, standard Business Central first asks you to confirm the change in the <strong>Check Prod. Order Status</strong> dialog.</li>
+<li>With <em>Error</em>, the change is blocked with a message that names the production order, before any standard dialog appears. Change or delete the production order first, then change the sales line.</li>
+</ul>
+<p>From here, production continues in standard Business Central: change the order status to <em>Released</em>, post consumption and output, and ship and invoice the sales order.</p>
 <hr>
 <h2 id="6-how-the-price-is-calculated">6. How the price is calculated</h2>
 <p>For each piece, with order quantity <strong>Q</strong>:</p>
@@ -1459,6 +1607,10 @@
 <li><strong>Worksheet quotes are all-or-nothing.</strong> If one accepted line has a problem (for example, no quantity), no quotes are created and the message tells you which line to fix.</li>
 <li><strong>Production BOM and routing belong to the finished item.</strong> They have the same number as the item. Changes you make directly in the standard Production BOM or Routing are replaced the next time you generate them from the specification.</li>
 <li><strong>Component units:</strong> packaging BOM quantities are in the base unit of measure of each component item, so board and film should use m², ink liters, and glue kilograms.</li>
+<li><strong>One production order per sales line.</strong> Create Packaging Production works on the selected line. A line can have only one open (firm planned or released) production order; finished orders don't count.</li>
+<li><strong>What the action checks:</strong> the line must be on a sales order, be an item line with a packaging specification, have a quantity still to ship and a shipment date, and the specification must be released with the same item as the line.</li>
+<li><strong>Always Regenerate and open orders:</strong> with <em>Always Regenerate</em>, the action fails if another open production order already uses the production BOM or routing of the item, because they can't be replaced then. Use <em>Only if Missing</em> if you produce the same item on several orders at the same time. After you change the specification, choose <strong>Calculate from Specification</strong> on the packaging BOM so that the new values reach the production BOM.</li>
+<li><strong>Production orders created elsewhere:</strong> if you create a production order with the standard <strong>Planning</strong> or <strong>Order Planning</strong> functions from a sales line with a packaging specification, it also gets the sales order, specification, and cost sheet links.</li>
 </ul>
 <hr>
 <h2 id="8-roles-and-permissions">8. Roles and permissions</h2>
@@ -1474,7 +1626,7 @@
 <tr>
 <td><strong>PP_USER</strong></td>
 <td>Sales and calculation staff</td>
-<td>Create and maintain specifications and cost sheets; release specifications (creates the finished item); run the Packaging Quote Wizard; work in the Packaging Worksheet and its batches; maintain packaging BOMs and generate production BOMs and routings; read setup and rates.</td>
+<td>Create and maintain specifications and cost sheets; release specifications (creates the finished item); run the Packaging Quote Wizard; work in the Packaging Worksheet and its batches; maintain packaging BOMs and generate production BOMs and routings; create production orders from sales order lines; read setup and rates.</td>
 </tr>
 <tr>
 <td><strong>PP_POWERUSER</strong></td>
@@ -1488,11 +1640,10 @@
 </tr>
 </tbody>
 </table>
-<p>Users also need the standard Business Central permissions for their role, for example for working with items, customers, and sales quotes and orders.</p>
+<p>Users also need the standard Business Central permissions for their role, for example for working with items, customers, sales quotes and orders, and production orders (creating a production order also writes components, routing lines, capacity needs, and reservations).</p>
 <hr>
 <h2 id="9-coming-next">9. Coming next</h2>
-<h3 id="91-phase-5-production-order">9.1 Phase 5 – Production order 🔜</h3>
-<p>A <strong>Create Packaging Production</strong> action on the Sales Order generates the BOM and routing, if needed, and creates the <strong>Production Order</strong> as <em>Firm Planned</em> or <em>Released</em>, depending on the setup.</p>
+<p>All MVP phases are now available. The next step is release readiness: end-to-end testing in a sandbox, permission checks, and translations. Ideas for after the MVP include updating the production order automatically when the sales quantity changes, production BOM and routing versions, and machine centers in routing templates.</p>
 <hr>
 <h2 id="10-known-limitations">10. Known limitations</h2>
 <table>
@@ -1539,6 +1690,16 @@
 <td>Routing templates use work centers only, not machine centers.</td>
 <td>Model machines as separate work centers for the MVP.</td>
 </tr>
+<tr>
+<td>Sales quantity changes</td>
+<td>After a production order exists, a changed sales quantity is only reported (warning) or blocked (error); the production order isn't updated automatically.</td>
+<td>Update the production order quantity manually and refresh it.</td>
+</tr>
+<tr>
+<td>Production order per line</td>
+<td>Create Packaging Production works on one selected sales line at a time.</td>
+<td>For orders with several packaging lines, run the action on each line.</td>
+</tr>
 </tbody>
 </table>
 <hr>
@@ -1552,6 +1713,11 @@
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>0.7</td>
+<td>2026-11-06</td>
+<td>Phase 5: Create Packaging Production on the sales order line, production order settings, links between sales line and production order, duplicate prevention, warning or error on sales quantity changes.</td>
+</tr>
 <tr>
 <td>0.6</td>
 <td>2026-10-30</td>

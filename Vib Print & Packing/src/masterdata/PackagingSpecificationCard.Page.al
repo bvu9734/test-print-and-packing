@@ -243,6 +243,22 @@ page 50114 "CCO Packaging Spec. Card"
           Page.Run(Page::Routing, RoutingHeader);
         end;
       }
+      action(ProductionOrders)
+      {
+        ApplicationArea = All;
+        Caption = 'Production Orders';
+        Image = Production;
+        ToolTip = 'Open the production orders that were created from sales order lines for this specification.', Comment = 'hu-HU=Megnyitja a specifikációhoz értékesítési rendeléssorokból létrehozott gyártási rendeléseket.';
+
+        trigger OnAction()
+        var
+          ProductionOrder: Record "Production Order";
+        begin
+          ProductionOrder.SetCurrentKey("CCO Packaging Spec. No.");
+          ProductionOrder.SetRange("CCO Packaging Spec. No.", Rec."No.");
+          Page.Run(Page::"Production Order List", ProductionOrder);
+        end;
+      }
     }
     area(Promoted)
     {
@@ -266,6 +282,9 @@ page 50114 "CCO Packaging Spec. Card"
         {
         }
         actionref(GenerateRouting_Promoted; GenerateRouting)
+        {
+        }
+        actionref(ProductionOrders_Promoted; ProductionOrders)
         {
         }
       }

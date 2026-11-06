@@ -198,7 +198,7 @@ codeunit 50203 "CCO Library - Packaging"
   end;
 
   /// <summary>
-  /// Creates a routing template with four operations on new work centers:
+  /// Creates a routing template with four operations on new work centers with calculated calendars:
   /// 10 printing (only if printed), 20 laminating (only if laminated), 30 die cutting (only if die cut), and 40 packing (always).
   /// </summary>
   procedure CreateRoutingTemplate() TemplateCode: Code[20]
@@ -217,13 +217,54 @@ codeunit 50203 "CCO Library - Packaging"
     AddTemplateOperation(TemplateCode, '40', 5, 0.005, "CCO Operation Condition"::Always);
   end;
 
+  /// <summary>
+  /// Sets the production settings in Packaging Setup.
+  /// </summary>
+  procedure SetProductionSetup(ProdOrderStatus: Enum "CCO Pack. Prod. Order Status"; BOMRoutingGeneration: Enum "CCO BOM Routing Generation"; QtyCheck: Enum "CCO Prod. Order Qty. Check")
+  var
+    PackagingSetup: Record "CCO Packaging Setup";
+  begin
+    PackagingSetup.Get();
+    PackagingSetup."Prod. Order Status" := ProdOrderStatus;
+    PackagingSetup."BOM/Routing Generation" := BOMRoutingGeneration;
+    PackagingSetup."Qty. Change after Prod. Order" := QtyCheck;
+    PackagingSetup.Modify(false);
+  end;
+
+  /// <summary>
+  /// Creates a sales order with one line for a released, printed, laminated, and die-cut specification (see CreateSpecification).
+  /// The finished item is produced to order, and the specification has a routing template (see CreateRoutingTemplate).
+  /// </summary>
+  procedure CreatePackagingSalesOrder(var PackagingSpecification: Record "CCO Packaging Specification"; var SalesLine: Record "Sales Line"; LineQuantity: Decimal)
+  var
+    Item: Record Item;
+    SalesHeader: Record "Sales Header";
+    LibrarySales: Codeunit "Library - Sales";
+    CustomerNo: Code[20];
+  begin
+    CustomerNo := CreateSalesCustomer(0);
+    CreateReleasedSpecification(PackagingSpecification, CustomerNo, true, true);
+    PackagingSpecification."Routing Template Code" := CreateRoutingTemplate();
+    PackagingSpecification.Modify(false);
+
+    Item.Get(PackagingSpecification."Item No.");
+    Item.Validate("Replenishment System", Item."Replenishment System"::"Prod. Order");
+    Item.Validate("Manufacturing Policy", Item."Manufacturing Policy"::"Make-to-Order");
+    Item.Modify(true);
+
+    LibrarySales.CreateSalesHeader(SalesHeader, SalesHeader."Document Type"::Order, CustomerNo);
+    LibrarySales.CreateSalesLine(SalesLine, SalesHeader, SalesLine.Type::Item, Item."No.", LineQuantity);
+    SalesLine."CCO Packaging Spec. No." := PackagingSpecification."No.";
+    SalesLine.Modify(false);
+  end;
+
   local procedure AddTemplateOperation(TemplateCode: Code[20]; OperationNo: Code[10]; SetupTime: Decimal; RunTime: Decimal; Condition: Enum "CCO Operation Condition")
   var
     RoutingTemplateLine: Record "CCO Routing Template Line";
     WorkCenter: Record "Work Center";
     LibraryManufacturing: Codeunit "Library - Manufacturing";
   begin
-    LibraryManufacturing.CreateWorkCenter(WorkCenter);
+    LibraryManufacturing.CreateWorkCenterWithCalendar(WorkCenter);
     RoutingTemplateLine.Init();
     RoutingTemplateLine."Template Code" := TemplateCode;
     RoutingTemplateLine."Operation No." := OperationNo;

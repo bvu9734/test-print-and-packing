@@ -18,5 +18,13 @@ tableextension 50130 "CCO Sales Line Ext." extends "Sales Line"
       TableRelation = "CCO Packaging Cost Sheet";
       Editable = false;
     }
+    field(50102; "CCO Prod. Order No."; Code[20])
+    {
+      Caption = 'Prod. Order No.';
+      ToolTip = 'Specifies the open firm planned or released production order that was created for the sales order line.', Comment = 'hu-HU=Megadja az értékesítési rendeléssorhoz létrehozott nyitott, véglegesen tervezett vagy kiadott gyártási rendelést.';
+      FieldClass = FlowField;
+      CalcFormula = lookup("Production Order"."No." where("CCO Sales Order No." = field("Document No."), "CCO Sales Order Line No." = field("Line No."), Status = filter("Firm Planned" | Released)));
+      Editable = false;
+    }
   }
 }

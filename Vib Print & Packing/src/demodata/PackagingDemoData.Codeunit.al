@@ -31,6 +31,7 @@ codeunit 50139 "CCO Packaging Demo Data"
     NoPostingGroupsTxt: Label 'No item with posting groups was found. The demo items have no posting groups, so they cannot be posted or quoted until you add them.';
     NoCustomerPostingSetupTxt: Label 'No customer with posting groups was found. The demo customers have no posting groups, so quotes may fail until you add them.';
     NoShopCalendarTxt: Label 'No shop calendar was found. The demo work centers have no shop calendar; add one before you schedule production orders.';
+    NoProdOrderNosTxt: Label 'Firm Planned Order Nos. or Released Order Nos. is empty in Manufacturing Setup. Fill them in before you create production orders from sales order lines.';
     BoxTemplateTok: Label 'BOX_STD', Locked = true;
     LabelTemplateTok: Label 'LABEL_STD', Locked = true;
     DigitalTemplateTok: Label 'DIGITAL_STD', Locked = true;
@@ -66,8 +67,19 @@ codeunit 50139 "CCO Packaging Demo Data"
     CreateCustomers();
     CreateSpecifications();
     CreateWorksheet();
+    CheckManufacturingSetup();
 
     GenerationSummary := Summary.ToText();
+  end;
+
+  local procedure CheckManufacturingSetup()
+  var
+    ManufacturingSetup: Record "Manufacturing Setup";
+  begin
+    if not ManufacturingSetup.Get() then
+      ManufacturingSetup.Init();
+    if (ManufacturingSetup."Firm Planned Order Nos." = '') or (ManufacturingSetup."Released Order Nos." = '') then
+      Summary.AppendLine(NoProdOrderNosTxt);
   end;
 
   local procedure CreateWorkCenters()

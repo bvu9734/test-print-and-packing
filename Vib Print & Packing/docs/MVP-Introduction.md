@@ -3,9 +3,9 @@
 | | |
 |---|---|
 | **Product** | COSMO Print & Packaging Accelerator for Microsoft Dynamics 365 Business Central |
-| **Document version** | 0.6 |
-| **Last updated** | 2026-10-30 |
-| **Covers** | Phase 1 – Packaging master data, Phase 2 – Cost calculation, Phase 3 – Quote Wizard, Packaging Worksheet, and Sales Quote, Phase 4 – Production BOM and routing |
+| **Document version** | 0.7 |
+| **Last updated** | 2026-11-06 |
+| **Covers** | Phase 1 – Packaging master data, Phase 2 – Cost calculation, Phase 3 – Quote Wizard, Packaging Worksheet, and Sales Quote, Phase 4 – Production BOM and routing, Phase 5 – Production order |
 | **Audience** | Business users, key users, and customer stakeholders |
 
 > This is a living document. A new chapter is added after each implementation phase. Planned features are marked 🔜 and described only briefly until they are available.
@@ -18,7 +18,7 @@
 2. [End-to-end process and feature status](#2-end-to-end-process-and-feature-status)
 3. [Key concepts](#3-key-concepts)
 4. [One-time setup](#4-one-time-setup)
-5. [Worked example: from specification to production BOM and routing](#5-worked-example-from-specification-to-production-bom-and-routing)
+5. [Worked example: from specification to production order](#5-worked-example-from-specification-to-production-order)
 6. [How the price is calculated](#6-how-the-price-is-calculated)
 7. [Good to know](#7-good-to-know)
 8. [Roles and permissions](#8-roles-and-permissions)
@@ -38,7 +38,7 @@ The goal of the MVP is that a user can, **within a few minutes**:
 2. Calculate its **cost and sales price** for a range of order quantities.
 3. Create a **Sales Quote** from the chosen price.
 4. Turn the accepted quote into a **Sales Order**.
-5. Generate the **Production BOM** and **Routing**, and then the **Production Order**. *(BOM and routing are available; the production order follows in Phase 5.)* 🔜
+5. Generate the **Production BOM** and **Routing**, and then the **Production Order** from the sales order line.
 
 The accelerator does not replace Business Central processes. Sales, manufacturing, inventory, and finance continue to run on the **standard Business Central documents**. The accelerator adds the packaging-specific steps in front of them.
 
@@ -56,7 +56,7 @@ The accelerator does not replace Business Central processes. Sales, manufacturin
 | 6 | Sales Quote | Packaging Quote Wizard (one specification) or Packaging Worksheet (several specifications) → standard Sales Quote | ✅ Available (Phase 3) |
 | 7 | Customer approval → Sales Order | Standard Business Central (*Make Order*) | ✅ Available (Phase 3) |
 | 8 | Production BOM and routing generation | Packaging BOM, routing templates → standard Production BOM and Routing | ✅ Available (Phase 4) |
-| 9 | Production Order | Action on the Sales Order | 🔜 Phase 5 |
+| 9 | Production Order | **Create Packaging Production** on the sales order line → standard Firm Planned or Released Production Order | ✅ Available (Phase 5) |
 | 10 | Consumption, output, shipment, invoice | Standard Business Central | Standard |
 
 ---
@@ -193,9 +193,23 @@ Finally, in the **Routing Templates** section of **Packaging Setup**, choose the
 
 A specification can override the default in its **Routing Template Code** field. **Generate Demo Data** creates these work centers, templates, and defaults for you.
 
+Production orders are scheduled on the work center calendars, so each work center needs a **shop calendar**, and you must run **Calculate Work Center Calendar** for the period you plan in.
+
+### Step 4.8 – Production order settings
+
+In the **Production** section of **Packaging Setup**:
+
+| Field | Options | Meaning |
+|---|---|---|
+| Prod. Order Status | **Firm Planned** (default), Released | The status of the production orders that **Create Packaging Production** creates. |
+| BOM/Routing Generation | **Only if Missing** (default), Always Regenerate | *Only if Missing* generates the production BOM and routing only when the finished item has none. *Always Regenerate* generates them again every time—the production BOM from the current packaging BOM and the routing from the routing template—so the production order always uses the latest packaging BOM and template. |
+| Qty. Change after Prod. Order | **Warning** (default), Error | What happens when someone changes the quantity on a sales order line that already has an open production order. *Warning* allows the change and shows a notification; *Error* blocks the change. |
+
+In standard **Manufacturing Setup**, **Firm Planned Order Nos.** and **Released Order Nos.** must be filled in. **Generate Demo Data** warns you if they are missing.
+
 ---
 
-## 5. Worked example: from specification to production BOM and routing
+## 5. Worked example: from specification to production order
 
 **Scenario:** Pizza Kft. asks for a printed, laminated takeaway food box with a custom cutting die.
 
@@ -440,7 +454,7 @@ If the worksheet also contained lines for another customer, that customer would 
 
 ### Step 5.14 – Customer approval: make the sales order
 
-When Pizza Kft. accepts the offer, choose **Make Order** on the sales quote (standard Business Central). The sales order line keeps the **Packaging Spec. No.** and **Packaging Cost Sheet No.**, which Phase 5 will use to create the production order.
+When Pizza Kft. accepts the offer, choose **Make Order** on the sales quote (standard Business Central). The sales order line keeps the **Packaging Spec. No.** and **Packaging Cost Sheet No.**, which **Create Packaging Production** uses in step 5.18.
 
 ### Step 5.15 – Prepare production: review the packaging BOM
 
@@ -481,6 +495,51 @@ The standard **Routing** `PPI0001` is created as a serial routing with status **
 Use **Production BOM** and **Routing** on the specification card to open the generated records.
 
 **Generating again** after a change (for example a new waste percentage or a different template) replaces the lines of the existing production BOM or routing and certifies it again. This is blocked if an open production order uses the production BOM or routing; in that case finish or delete the production order first, or create a new version in standard Business Central.
+
+### Step 5.18 – Create the production order from the sales order
+
+Open the sales order of Pizza Kft. from step 5.14. Select the line for `PPI0001` (1,000 pieces, shipment date 20 November) and choose **Line → Create Packaging Production**.
+
+The system checks the line and then:
+
+1. Generates the production BOM and routing if the item has none (setup *Only if Missing*). They already exist from steps 5.16 and 5.17, so they are reused.
+2. Creates a standard production order with the status from Packaging Setup—here **Firm Planned**—for item `PPI0001`, quantity 1,000, and due date 20 November. Business Central calculates the components, the routing, and the schedule, and reserves the order for the sales line (the item is *Make-to-Order*).
+3. Stores the sales order, line, specification, and cost sheet on the production order.
+4. Shows a message and offers to open the production order.
+
+The production order components for 1,000 pieces (quantity per × 1,000, plus scrap):
+
+| Item No. | Quantity per | Scrap % | Expected quantity |
+|---|---:|---:|---:|
+| `MAT-CB-E` | 0.06 | 10 | 66 m² |
+| `INK-BLACK` | 0.0012 | 10 | 1.32 l |
+| `GLUE-01` | 0.005 | 0 | 5 kg |
+| `FILM-GLOSS` | 0.06 | 10 | 66 m² |
+
+The production order routing (setup time + run time × 1,000, in minutes):
+
+| Operation No. | Work Center | Setup Time | Run Time | Total |
+|---|---|---:|---:|---:|
+| 10 | `PP-PRINT` | 30 | 0.02 | 50 |
+| 20 | `PP-LAMINATE` | 15 | 0.01 | 25 |
+| 30 | `PP-DIECUT` | 45 | 0.015 | 60 |
+| 40 | `PP-FOLD` | 10 | 0.01 | 20 |
+| 50 | `PP-GLUE` | 10 | 0.01 | 20 |
+| 60 | `PP-PACK` | 5 | 0.005 | 10 |
+| | | | | **185** |
+
+The sales order line now shows the **Prod. Order No.**; drill down on it to open the production order. On the production order, the **Sales Order No.**, **Sales Order Line No.**, **Packaging Spec. No.**, and **Packaging Cost Sheet No.** show where it came from. On the specification card, **Production Orders** lists all orders for the specification.
+
+**Running the action again** on the same line doesn't create a second order. The message tells you which open production order already exists for the line.
+
+### Step 5.19 – The customer changes the quantity
+
+Pizza Kft. now wants 1,200 boxes. When you change the quantity on the sales order line from 1,000 to 1,200:
+
+- With **Qty. Change after Prod. Order** = *Warning*, the change is saved and a notification says that firm planned production order for 1,000 pieces exists for the line. Choose **Open Production Order** in the notification and update its quantity, then refresh it. If **Planning Warning** is turned on in Manufacturing Setup, standard Business Central first asks you to confirm the change in the **Check Prod. Order Status** dialog.
+- With *Error*, the change is blocked with a message that names the production order, before any standard dialog appears. Change or delete the production order first, then change the sales line.
+
+From here, production continues in standard Business Central: change the order status to *Released*, post consumption and output, and ship and invoice the sales order.
 
 ---
 
@@ -524,6 +583,10 @@ On the **sales quote**, the unit price is then converted to the customer's curre
 - **Worksheet quotes are all-or-nothing.** If one accepted line has a problem (for example, no quantity), no quotes are created and the message tells you which line to fix.
 - **Production BOM and routing belong to the finished item.** They have the same number as the item. Changes you make directly in the standard Production BOM or Routing are replaced the next time you generate them from the specification.
 - **Component units:** packaging BOM quantities are in the base unit of measure of each component item, so board and film should use m², ink liters, and glue kilograms.
+- **One production order per sales line.** Create Packaging Production works on the selected line. A line can have only one open (firm planned or released) production order; finished orders don't count.
+- **What the action checks:** the line must be on a sales order, be an item line with a packaging specification, have a quantity still to ship and a shipment date, and the specification must be released with the same item as the line.
+- **Always Regenerate and open orders:** with *Always Regenerate*, the action fails if another open production order already uses the production BOM or routing of the item, because they can't be replaced then. Use *Only if Missing* if you produce the same item on several orders at the same time. After you change the specification, choose **Calculate from Specification** on the packaging BOM so that the new values reach the production BOM.
+- **Production orders created elsewhere:** if you create a production order with the standard **Planning** or **Order Planning** functions from a sales line with a packaging specification, it also gets the sales order, specification, and cost sheet links.
 
 ---
 
@@ -531,19 +594,17 @@ On the **sales quote**, the unit price is then converted to the customer's curre
 
 | Permission set | Intended for | Can do |
 |---|---|---|
-| **PP_USER** | Sales and calculation staff | Create and maintain specifications and cost sheets; release specifications (creates the finished item); run the Packaging Quote Wizard; work in the Packaging Worksheet and its batches; maintain packaging BOMs and generate production BOMs and routings; read setup and rates. |
+| **PP_USER** | Sales and calculation staff | Create and maintain specifications and cost sheets; release specifications (creates the finished item); run the Packaging Quote Wizard; work in the Packaging Worksheet and its batches; maintain packaging BOMs and generate production BOMs and routings; create production orders from sales order lines; read setup and rates. |
 | **PP_POWERUSER** | Key users | Everything in PP_USER, plus maintain Packaging Setup, the Print Cost Matrix, routing templates, and customer packaging margins. |
 | **PP_ADMIN** | Administrators | Everything in PP_POWERUSER, plus full item maintenance and **Generate Demo Data**. |
 
-Users also need the standard Business Central permissions for their role, for example for working with items, customers, and sales quotes and orders.
+Users also need the standard Business Central permissions for their role, for example for working with items, customers, sales quotes and orders, and production orders (creating a production order also writes components, routing lines, capacity needs, and reservations).
 
 ---
 
 ## 9. Coming next
 
-### 9.1 Phase 5 – Production order 🔜
-
-A **Create Packaging Production** action on the Sales Order generates the BOM and routing, if needed, and creates the **Production Order** as *Firm Planned* or *Released*, depending on the setup.
+All MVP phases are now available. The next step is release readiness: end-to-end testing in a sandbox, permission checks, and translations. Ideas for after the MVP include updating the production order automatically when the sales quantity changes, production BOM and routing versions, and machine centers in routing templates.
 
 ---
 
@@ -558,6 +619,8 @@ A **Create Packaging Production** action on the Sales Order generates the BOM an
 | Glue | The glue quantity per piece in Packaging Setup applies to every specification. | Products without glue, such as inserts and labels, are still charged for glue. |
 | BOM and routing versions | Generating again replaces the lines of the one production BOM and routing per item; versions are not created. | Not possible while an open production order uses them; create versions manually in standard Business Central if you need them. |
 | Routing capacity | Routing templates use work centers only, not machine centers. | Model machines as separate work centers for the MVP. |
+| Sales quantity changes | After a production order exists, a changed sales quantity is only reported (warning) or blocked (error); the production order isn't updated automatically. | Update the production order quantity manually and refresh it. |
+| Production order per line | Create Packaging Production works on one selected sales line at a time. | For orders with several packaging lines, run the action on each line. |
 
 ---
 
@@ -565,6 +628,7 @@ A **Create Packaging Production** action on the Sales Order generates the BOM an
 
 | Version | Date | Change |
 |---|---|---|
+| 0.7 | 2026-11-06 | Phase 5: Create Packaging Production on the sales order line, production order settings, links between sales line and production order, duplicate prevention, warning or error on sales quantity changes. |
 | 0.6 | 2026-10-30 | Phase 4: packaging BOM, routing templates with operation conditions, generation of certified Production BOM and Routing; demo data with work centers and templates. |
 | 0.5 | 2026-10-30 | Generate Demo Data action on Packaging Setup for manual testing. |
 | 0.4 | 2026-10-30 | Phase 3: Packaging Worksheet with worksheet batches—quote several specifications at once, one sales quote per customer. |

@@ -82,6 +82,23 @@ page 50115 "CCO Packaging Setup"
           ApplicationArea = All;
         }
       }
+      group(Production)
+      {
+        Caption = 'Production';
+
+        field("Prod. Order Status"; Rec."Prod. Order Status")
+        {
+          ApplicationArea = All;
+        }
+        field("BOM/Routing Generation"; Rec."BOM/Routing Generation")
+        {
+          ApplicationArea = All;
+        }
+        field("Qty. Change after Prod. Order"; Rec."Qty. Change after Prod. Order")
+        {
+          ApplicationArea = All;
+        }
+      }
     }
   }
 

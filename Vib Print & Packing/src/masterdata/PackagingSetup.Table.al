@@ -105,6 +105,24 @@ table 50106 "CCO Packaging Setup"
       DataClassification = CustomerContent;
       TableRelation = "CCO Routing Template";
     }
+    field(30; "Prod. Order Status"; Enum "CCO Pack. Prod. Order Status")
+    {
+      Caption = 'Prod. Order Status';
+      ToolTip = 'Specifies the status of the production orders that are created from sales order lines: Firm Planned or Released.', Comment = 'hu-HU=Megadja az értékesítési rendelés soraiból létrehozott gyártási rendelések állapotát: Véglegesen tervezett vagy Kiadott.';
+      DataClassification = CustomerContent;
+    }
+    field(31; "BOM/Routing Generation"; Enum "CCO BOM Routing Generation")
+    {
+      Caption = 'BOM/Routing Generation';
+      ToolTip = 'Specifies when the production BOM and routing are generated from the specification before a production order is created. Only if Missing generates them only when the finished item has none; Always Regenerate generates them again every time.', Comment = 'hu-HU=Megadja, hogy a gyártási rendelés létrehozása előtt mikor generálódik a gyártási anyagjegyzék és a műveleti terv a specifikációból. Csak ha hiányzik: csak akkor generálja, ha a késztermék nem rendelkezik velük; Mindig újragenerál: minden alkalommal újragenerálja őket.';
+      DataClassification = CustomerContent;
+    }
+    field(32; "Qty. Change after Prod. Order"; Enum "CCO Prod. Order Qty. Check")
+    {
+      Caption = 'Qty. Change after Prod. Order';
+      ToolTip = 'Specifies what happens when the quantity of a sales order line is changed after an open production order was created for it. Warning allows the change and shows a notification; Error blocks the change.', Comment = 'hu-HU=Megadja, mi történjen, ha egy értékesítési rendeléssor mennyisége megváltozik, miután nyitott gyártási rendelés jött létre hozzá. Figyelmeztetés: engedi a módosítást és értesítést jelenít meg; Hiba: megakadályozza a módosítást.';
+      DataClassification = CustomerContent;
+    }
   }
 
   keys
